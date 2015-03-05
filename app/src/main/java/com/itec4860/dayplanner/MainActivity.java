@@ -1,6 +1,7 @@
 package com.itec4860.dayplanner;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 /**Class: MainActivity
@@ -26,10 +27,11 @@ public class MainActivity extends Activity {
         //check for registration status
         //then switch to the appropriate screen/activity
 
-        //NOTE: it currently sets the view to the default 'activity_main' with a 'Hello World'
-        //text view - I will change this
+        //setContentView(R.layout.activity_main);
 
-        setContentView(R.layout.activity_main);
+        Intent registrationIntent = new Intent(getApplicationContext(), CalendarActivity.class);
+        startActivity(registrationIntent);
+        finish();
     }
 
 }
