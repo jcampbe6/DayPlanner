@@ -1,7 +1,14 @@
 <resources>
     <string name="app_name">Day Planner</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_calendar">Calendar</string>
+
+
+    <string-array name="calendar_view_options_list">
+        <item>Month</item>
+        <item>Week</item>
+        <item>Day</item>
+    </string-array>
+
 </resources>
