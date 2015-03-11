@@ -8,24 +8,21 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center" >
+        android:layout_height="fill_parent"
+        android:padding="10dp">
 
-        <ImageButton
-            android:id="@+id/selectedDayIndicator"
+        <ImageView
+            android:id="@+id/selectedDayImage"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:src="@drawable/test_selector"
-            android:background="@null"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"/>
+            android:src="@drawable/test_selector"/>
 
-        <Button
-            android:id="@+id/calendarDayGridCell"
-            android:layout_gravity="center"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+        <TextView
+            android:id="@+id/calendarDayText"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:background="@android:color/transparent"/>

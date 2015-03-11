@@ -6,9 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,40 +23,40 @@ import java.util.List;
  * Purpose: This class ...
  */
 
-public class GridCellAdapter extends BaseAdapter implements View.OnClickListener
+public class GridCellAdapter extends BaseAdapter
 {
     private final Context CONTEXT;
     private final List<DateInfoHolder> GRID_CELL_INFO_LIST = new ArrayList<DateInfoHolder>();
 
-    private int currentDay;
-    private int selectedDay;
+    private int today;
+    private String selectedDate;
 
     /**
      * Constructor: GridCellAdapter
      * Constructs an adapter to populate each day in a calendar grid.
      * @param context the Day Planner application environment
+     * @param today today's date
      */
-    public GridCellAdapter(Context context, int currentDay)
+    public GridCellAdapter(Context context, int today)
     {
         super();
         this.CONTEXT = context;
-        this.currentDay = currentDay;
+        this.today = today;
     }
 
     /**
      * Constructor: GridCellAdapter
      * Constructs an adapter to populate each day in a calendar grid.
      * @param context the Day Planner application environment
-     * @param selectedDay the day to display as selected
+     * @param today today's date
+     * @param selectedDate the day to display as selected
      */
-    public GridCellAdapter(Context context, int currenday, int selectedDay)
+    public GridCellAdapter(Context context, int today, String selectedDate)
     {
         super();
         this.CONTEXT = context;
-        this.currentDay = currenday;
-        this.selectedDay = selectedDay;
-
-        //TODO fillCalendar(month, year);
+        this.today = today;
+        this.selectedDate = selectedDate;
     }
 
     public void addItem(DateInfoHolder dateInfoHolder)
@@ -65,14 +64,23 @@ public class GridCellAdapter extends BaseAdapter implements View.OnClickListener
         GRID_CELL_INFO_LIST.add(dateInfoHolder);
     }
 
-    //TODO
+    /**
+     * Method getCount
+     * Returns the size of the list containing DateInfoHolder objects.
+     * @return the size of the list
+     */
     @Override
     public int getCount()
     {
         return GRID_CELL_INFO_LIST.size();
     }
 
-    //TODO
+    /**
+     * Method: getItem
+     * Returns the item at the specified position in the list containing DateInfoHolder objects.
+     * @param position the position in the list
+     * @return the item
+     */
     @Override
     public DateInfoHolder getItem(int position)
     {
@@ -110,51 +118,46 @@ public class GridCellAdapter extends BaseAdapter implements View.OnClickListener
             cell = inflater.inflate(R.layout.grid_cell, parent, false);
         }
 
-        final DateInfoHolder dateInfoHolder = GRID_CELL_INFO_LIST.get(position);
-        dateInfoHolder.setSelectedDayIndicator((ImageButton) cell.findViewById(R.id.selectedDayIndicator));
+        DateInfoHolder dateInfoHolder = getItem(position);
+        dateInfoHolder.setSelectedDayImage((ImageView) cell.findViewById(R.id.selectedDayImage));
 
-        Button gridCell = (Button) cell.findViewById(R.id.calendarDayGridCell);
-        gridCell.setTextColor(Color.parseColor(dateInfoHolder.getDateColor()));
-        gridCell.setText(dateInfoHolder.getDay());
-        gridCell.setTag(dateInfoHolder);
-        gridCell.setOnClickListener(this);
+        TextView gridCellText = (TextView) cell.findViewById(R.id.calendarDayText);
+        gridCellText.setTextColor(Color.parseColor(dateInfoHolder.getDateColor()));
+        gridCellText.setText(dateInfoHolder.getDay());
 
-        if (dateInfoHolder.getDay().equals(String.valueOf(currentDay)))
+        if (dateInfoHolder.getDay().equals(String.valueOf(today)))
         {
-            gridCell.setTextAppearance(CONTEXT, android.R.style.TextAppearance_Large);
-            dateInfoHolder.getSelectedDayIndicator().setImageResource(R.drawable.circle_solid);
+            gridCellText.setTextAppearance(CONTEXT, android.R.style.TextAppearance_Large);
+            dateInfoHolder.getSelectedDayImage().setImageResource(R.drawable.circle_solid);
         }
 
-        if (Integer.parseInt(dateInfoHolder.getDay()) == selectedDay)
+        else if (dateInfoHolder.getDate().equalsIgnoreCase(selectedDate))
         {
-            dateInfoHolder.getSelectedDayIndicator().setFocusable(true);
-            dateInfoHolder.getSelectedDayIndicator().setFocusableInTouchMode(true);
-            dateInfoHolder.getSelectedDayIndicator().requestFocus();
+            dateInfoHolder.getSelectedDayImage().setImageResource(R.drawable.circle_outline);
         }
+
+        else
+        {
+            dateInfoHolder.getSelectedDayImage().setImageResource(R.drawable.circle_invisible);
+        }
+
+        cell.setTag(dateInfoHolder);
 
         return cell;
     }
 
-    public int getSelectedDay()
+    /**
+     * Method: getSelectedDate
+     * Returns the day that has been selected/clicked on by the user.
+     * @return the selected day
+     */
+    public String getSelectedDate()
     {
-        return selectedDay;
+        return selectedDate;
     }
 
-    /**
-     * Method: onClick
-     * Will eventually perform calendar specific functions, such as create a new calendar event.
-     * @param view the cell that was clicked
-     */
-   //TODO @Override
-    public void onClick(View view)
+    public void setSelectedDate(String selectedDate)
     {
-        DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
-        dateInfoHolder.getSelectedDayIndicator().setFocusable(true);
-        dateInfoHolder.getSelectedDayIndicator().setFocusableInTouchMode(true);
-        dateInfoHolder.getSelectedDayIndicator().requestFocus();
-
-        Toast.makeText(CONTEXT, dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
-
-        selectedDay = Integer.parseInt(dateInfoHolder.getDay());
+        this.selectedDate = selectedDate;
     }
 }

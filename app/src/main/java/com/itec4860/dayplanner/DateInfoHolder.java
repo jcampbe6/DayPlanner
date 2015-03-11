@@ -1,6 +1,6 @@
 package com.itec4860.dayplanner;
 
-import android.widget.ImageButton;
+import android.widget.ImageView;
 
 /**
  * Created by Joshua on 3/10/2015.
@@ -11,7 +11,7 @@ public class DateInfoHolder
     private String day;
     private String year;
     private String dateColor;
-    private ImageButton selectedDayIndicator;
+    private ImageView selectedDayImage;
 
     public DateInfoHolder(String month, String day, String year, String dateColor)
     {
@@ -61,13 +61,13 @@ public class DateInfoHolder
         return dateColor;
     }
 
-    public ImageButton getSelectedDayIndicator()
+    public ImageView getSelectedDayImage()
     {
-        return selectedDayIndicator;
+        return selectedDayImage;
     }
 
-    public void setSelectedDayIndicator(ImageButton selectedDayIndicator)
+    public void setSelectedDayImage(ImageView selectedDayImage)
     {
-        this.selectedDayIndicator = selectedDayIndicator;
+        this.selectedDayImage = selectedDayImage;
     }
 }

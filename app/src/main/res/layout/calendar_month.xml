@@ -116,7 +116,8 @@
         android:horizontalSpacing="1dp"
         android:verticalSpacing="1dp"
         android:paddingRight="-1dp"
+        android:paddingEnd="-1dp"
         android:stretchMode="columnWidth"
-        android:background="#dfdfdf" />
+        android:background="#dfdfdf"/>
 
 </LinearLayout>
