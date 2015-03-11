@@ -13,14 +13,15 @@
 
         <ImageView
             android:id="@+id/selectedDayImage"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:src="@drawable/test_selector"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"/>
 
         <TextView
             android:id="@+id/calendarDayText"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_centerVertical="true"
@@ -32,9 +33,10 @@
 
     <TextView
         android:id="@+id/numEventsPerDay"
-        style="@style/calendar_event_style"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:layout_gravity="end"
-        android:layout_width="10dip"
-        android:layout_height="10dip"/>
+        style="@style/calendar_event_style"/>
 
 </RelativeLayout>

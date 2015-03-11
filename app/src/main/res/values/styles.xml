@@ -12,10 +12,6 @@
         <item name="displayOptions">useLogo|showHome</item>
     </style>
 
-    <style name="MySpinner" parent="Widget.AppCompat.Spinner.DropDown.ActionBar">
-        <item name="background">@drawable/spinner_background</item>
-    </style>
-
 
     <style name="calendar_event_style" parent="@android:style/TextAppearance.Small">
         <item name="android:textColor">#FF6600</item>

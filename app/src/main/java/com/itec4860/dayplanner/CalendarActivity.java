@@ -1,9 +1,9 @@
 package com.itec4860.dayplanner;
 
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +17,7 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -28,7 +29,7 @@ import java.util.Locale;
  * Written: March 6, 2015
  *
  * This class displays a screen representing a calendar of the current month determined by the
- * mobile device's local Calendar instance and allows the user to view the previous and next month
+ * mobile device's local Calendar instance and allows the user to view the previous and next months
  * in relation to the current month displayed.
  *
  * Purpose: This class will serve as the user interface for the Day Planner application for viewing
@@ -43,7 +44,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private ImageButton prevMonthButton;
     private ImageButton nextMonthButton;
     private GridView calendarGrid;
-    private GridCellAdapter adapter;
+    private CalendarGridAdapter adapter;
     private Calendar calendar;
     private int oldDay;
     private int currentDay;
@@ -51,16 +52,14 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private int year;
     private boolean navItemSelectedOnCreate;
 
-    private final DateFormat DATE_FORMATTER = new DateFormat();
-    private static final String DATE_FORMAT = "MMMM yyyy";
+    private static final String CALENDAR_TITLE_DATE_FORMAT = "MMMM yyyy";
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
     private final int[] DAYS_OF_THE_MONTHS = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    private final String TODAY_DATE_COLOR = "white";
-    private final String CURRENT_MONTH_DATE_COLOR = "black";
-    private final String NEXT_AND_PREV_MONTH_DATE_COLOR = "lightgrey";
 
     // variables for saving and retrieving instance state data
+    private static final String STATE_MONTH = "month";
+    private static final String STATE_YEAR = "year";
     private static final String STATE_SELECTED_DAY = "selected_day";
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
@@ -76,72 +75,107 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         SpinnerAdapter spinnerAdapter = ArrayAdapter.createFromResource(getApplicationContext(),
-                R.array.calendar_view_options_list, R.layout.action_bar_dropdown_item);
+                R.array.toggle_calendar_options_list, R.layout.action_bar_dropdown_item);
         actionBar.setListNavigationCallbacks(spinnerAdapter, this);
 
         prevMonthButton = (ImageButton) this.findViewById(R.id.prevMonth);
         prevMonthButton.setOnClickListener(this);
-
-        calendar = Calendar.getInstance(Locale.getDefault());
-        setCurrentDateInfo();
-
-        currentMonthTitle = (TextView) this.findViewById(R.id.currentMonthTitle);
-        currentMonthTitle.setText(DATE_FORMATTER.format(DATE_FORMAT, calendar.getTime()));
-
         nextMonthButton = (ImageButton) this.findViewById(R.id.nextMonth);
         nextMonthButton.setOnClickListener(this);
+
+        calendar = Calendar.getInstance(Locale.getDefault());
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_MONTH))
+        {
+            month = savedInstanceState.getInt(STATE_MONTH);
+            year = savedInstanceState.getInt(STATE_YEAR);
+
+            updateCurrentDay();
+            calendar.set(year, month - 1, currentDay);
+        }
+
+        else
+        {
+            setCurrentDateInfo();
+        }
+
+        currentMonthTitle = (TextView) this.findViewById(R.id.currentMonthTitle);
+        formatCalendarTitle();
 
         calendarGrid = (GridView) this.findViewById(R.id.calendarGrid);
         registerForContextMenu(calendarGrid);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DAY))
         {
-            adapter = new GridCellAdapter(getApplicationContext(), currentDay,
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDay,
                     savedInstanceState.getString(STATE_SELECTED_DAY));
         }
 
         else
         {
-            adapter = new GridCellAdapter(getApplicationContext(), currentDay);
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDay);
         }
 
         fillCalendar(currentDay, month, year);
-
         adapter.notifyDataSetChanged();
         calendarGrid.setAdapter(adapter);
+
         calendarGrid.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
+                highlightSelectedDate(dateInfoHolder);
 
+                // for testing
                 Toast.makeText(getApplicationContext(), dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
-
-                adapter.setSelectedDate(dateInfoHolder.getDate());
-                adapter.notifyDataSetChanged();
             }
         });
-
-
     }
 
+    /**
+     * Method: setCurrentDateInfo
+     * Sets the month, day, and year for the current month.
+     */
     private void setCurrentDateInfo()
     {
         month = calendar.get(Calendar.MONTH) + 1;
-        year = calendar.get(Calendar.YEAR);
         currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+        year = calendar.get(Calendar.YEAR);
     }
 
+    /**
+     * Method: updateCurrentDay
+     * Updates the current day for the app's calendar using the mobile device's internal calendar
+     * instance.
+     */
     private void updateCurrentDay()
     {
         oldDay = currentDay;
-        currentDay = calendar.get(Calendar.DAY_OF_MONTH);
+        Calendar localDeviceCalendar = Calendar.getInstance(Locale.getDefault());
+        currentDay = localDeviceCalendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    /**
+     * Method: highlightSelectedDate
+     * Highlights the selected date.
+     * @param dateInfoHolder the source of the selected date info to highlight
+     */
+    private void highlightSelectedDate(DateInfoHolder dateInfoHolder)
+    {
+        adapter.setSelectedDate(dateInfoHolder.getDate());
+        adapter.notifyDataSetChanged();
     }
 
     /**
      * Method: fillCalendar
-     * Fills the calendar grid with cells representing each day in a month in a given year.
+     * Fills the calendar grid with cells representing each day in a month in a given year by
+     * adding the dates of the last days of the previous month leading into the first week of
+     * the current month, adding each day of the current month, adding the first days of the next
+     * month that trail out of the last week of the current month, assigning each date a text color,
+     * and adding each date to the calendar grid adapter that actually displays the calendar.
+     * @param currentDayOfMonth the current day of the month
      * @param currentMonthNum the current or specified month
      * @param currentYear the current of specified year
      */
@@ -153,6 +187,10 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         int nextMonth;
         int yearOfNextMonth;
         int daysInCurrentMonth = getMonthTotalDays(currentMonthNum);
+
+        final String TODAY_DATE_COLOR = "white";
+        final String CURRENT_MONTH_DATE_COLOR = "black";
+        final String NEXT_AND_PREV_MONTH_DATE_COLOR = "lightgrey";
 
         // adjusted currentMonthNum by -1 for GregorianCalendar compatibility
         GregorianCalendar gregorianCalendar = new GregorianCalendar(currentYear, currentMonthNum - 1, 1);
@@ -235,14 +273,15 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.menu_calendar, menu);
+        getMenuInflater().inflate(R.menu.settings_menu, menu);
         return true;
     }
 
     /**
      * Method: onOptionsItemSelected
-     * Handles settings menu item clicks.
-     * @param item the menu item clicked
+     * Handles settings menu item selection actions to share the calendar or to display national
+     * holidays.
+     * @param item the menu item selected
      * @return true the action was handled
      */
     @Override
@@ -251,7 +290,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
+        if (id == R.id.shareCalendar)
         {
             return true;
         }
@@ -276,10 +315,11 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
             return true;
         }
 
-        String[] itemTitles = getResources().getStringArray(R.array.calendar_view_options_list);
+        String[] itemTitles = getResources().getStringArray(R.array.toggle_calendar_options_list);
 
         if (itemPosition < itemTitles.length)
         {
+            // for testing
             Toast.makeText(getApplicationContext(), itemTitles[itemPosition], Toast.LENGTH_SHORT).show();
             return true;
         }
@@ -287,19 +327,35 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         return true;
     }
 
+    /**
+     * Method: onCreateContextMenu
+     * Opens a pop up menu when a date is long pressed and highlights the selected date. Menu will
+     * contain options to view events related to the selected date or to add a new event to the
+     * selected date.
+     * @param menu the pop up menu
+     * @param view the date that was selected
+     * @param menuInfo the info about the selected date
+     */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo)
     {
         super.onCreateContextMenu(menu, view, menuInfo);
-
-
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 
-        MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.context_menu, menu);
+        DateInfoHolder dateInfoHolder = adapter.getItem(info.position);
+        highlightSelectedDate(dateInfoHolder);
 
+        MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.selected_date_options_menu, menu);
     }
 
+    /**
+     * Method: onContextItemSelected
+     * Handles context menu item selection actions to either view the selected event or to create a
+     * new event.
+     * @param item the menu item that was selected
+     * @return true the action was handled
+     */
     @Override
     public boolean onContextItemSelected(MenuItem item)
     {
@@ -315,16 +371,18 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     @Override
     public void onSaveInstanceState(Bundle instanceState) {
         instanceState.putInt(STATE_SELECTED_NAVIGATION_ITEM, getSupportActionBar().getSelectedNavigationIndex());
+        instanceState.putInt(STATE_MONTH, month);
+        instanceState.putInt(STATE_YEAR, year);
         instanceState.putString(STATE_SELECTED_DAY, adapter.getSelectedDate());
     }
 
     /**
      * Method: onRestoreInstanceState
      * Restores the saved instance state data when the calendar view is recreated.
-     * @param savedInstanceState
+     * @param savedInstanceState the saved state of the app instance
      */
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState)
+    public void onRestoreInstanceState(@NonNull Bundle savedInstanceState)
     {
         if (savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM))
         {
@@ -333,24 +391,28 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         }
     }
 
+    /**
+     * Method: onPostResume
+     * Updates calendar data after app has been minimized and then resumed.
+     */
     @Override
     protected void onPostResume()
     {
         super.onPostResume();
         updateCurrentDay();
 
-        /*if (currentDay != oldDay)
+        if (currentDay != oldDay)
         {
-            adapter = new GridCellAdapter(getApplicationContext(), currentDay);
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDay);
             fillCalendar(currentDay, month, year);
             adapter.notifyDataSetChanged();
             calendarGrid.setAdapter(adapter);
-        }*/
+        }
     }
 
     /**
      * Method: setCalendarMonthYear
-     * Sets the current calendar's month and year and updates the GridCellAdapter to the new month
+     * Sets the current calendar's month and year and updates the CalendarGridAdapter to the new month
      * and year to display the proper dates in each cell of the calendar.
      * @param month the new month
      * @param year the new year
@@ -358,9 +420,9 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private void setCalendarMonthYear(int month, int year)
     {
         updateCurrentDay();
-        adapter = new GridCellAdapter(getApplicationContext(), currentDay);
+        adapter = new CalendarGridAdapter(getApplicationContext(), currentDay);
         calendar.set(year, month - 1, currentDay);
-        currentMonthTitle.setText(DATE_FORMATTER.format(DATE_FORMAT, calendar.getTime()));
+        formatCalendarTitle();
         fillCalendar(currentDay, month, year);
         adapter.notifyDataSetChanged();
         calendarGrid.setAdapter(adapter);
@@ -369,23 +431,33 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     /**
      * Method: getMonthName
      * Returns the name of a month that is specified by the month number.
-     * @param monthByNum the number of the desired month
+     * @param monthNumber the number of the desired month
      * @return the name of the month
      */
-    private String getMonthName(int monthByNum)
+    private String getMonthName(int monthNumber)
     {
-        return MONTHS[monthByNum - 1];
+        return MONTHS[monthNumber - 1];
     }
 
     /**
      * Method: getMonthTotalDays
      * Returns the total number of days in a month specified by the month number.
-     * @param monthByNum the number of the desired month
+     * @param monthNumber the number of the desired month
      * @return the number of days
      */
-    private int getMonthTotalDays(int monthByNum)
+    private int getMonthTotalDays(int monthNumber)
     {
-        return DAYS_OF_THE_MONTHS[monthByNum - 1];
+        return DAYS_OF_THE_MONTHS[monthNumber - 1];
+    }
+
+    /**
+     * Method: formatCalendarTitle
+     * Formats and sets the calendar title.
+     */
+    private void formatCalendarTitle()
+    {
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(CALENDAR_TITLE_DATE_FORMAT, Locale.getDefault());
+        currentMonthTitle.setText(dateFormatter.format(calendar.getTime()));
     }
 
     /**

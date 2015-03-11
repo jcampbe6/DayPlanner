@@ -7,6 +7,5 @@
           android:gravity="center_vertical"
           android:padding="10dp"
           android:singleLine="true"
-          android:background="@drawable/spinner_background"
-          android:textAppearance="?android:attr/textAppearanceLargePopupMenu" />
-          <!-- style="?android:attr/dropDownItemStyle" -->
+          android:textAppearance="?android:attr/textAppearanceLargePopupMenu"
+          style="?android:attr/dropDownItemStyle" />

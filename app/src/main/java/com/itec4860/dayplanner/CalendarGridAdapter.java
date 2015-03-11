@@ -12,18 +12,20 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-/**Class: GridCellAdapter
+/**Class: CalendarGridAdapter
  * @author Joshua Campbell
  * @version 1.0
  * Course: ITEC 4860 Spring 2015
  * Written: March 6, 2015
  *
- * This class will...
+ * This class will contain a list of all the objects representing a single day in a calendar and
+ * will construct the view for each cell representing a day and display them on a calendar.
  *
- * Purpose: This class ...
+ * Purpose: This class will serve as a custom adapter for the Day Planner application to populate a
+ * GridView that represents a calendar with data.
  */
 
-public class GridCellAdapter extends BaseAdapter
+public class CalendarGridAdapter extends BaseAdapter
 {
     private final Context CONTEXT;
     private final List<DateInfoHolder> GRID_CELL_INFO_LIST = new ArrayList<DateInfoHolder>();
@@ -32,12 +34,12 @@ public class GridCellAdapter extends BaseAdapter
     private String selectedDate;
 
     /**
-     * Constructor: GridCellAdapter
+     * Constructor: CalendarGridAdapter
      * Constructs an adapter to populate each day in a calendar grid.
      * @param context the Day Planner application environment
      * @param today today's date
      */
-    public GridCellAdapter(Context context, int today)
+    public CalendarGridAdapter(Context context, int today)
     {
         super();
         this.CONTEXT = context;
@@ -45,13 +47,13 @@ public class GridCellAdapter extends BaseAdapter
     }
 
     /**
-     * Constructor: GridCellAdapter
+     * Constructor: CalendarGridAdapter
      * Constructs an adapter to populate each day in a calendar grid.
      * @param context the Day Planner application environment
      * @param today today's date
      * @param selectedDate the day to display as selected
      */
-    public GridCellAdapter(Context context, int today, String selectedDate)
+    public CalendarGridAdapter(Context context, int today, String selectedDate)
     {
         super();
         this.CONTEXT = context;
@@ -59,6 +61,11 @@ public class GridCellAdapter extends BaseAdapter
         this.selectedDate = selectedDate;
     }
 
+    /**
+     * Method: addItem
+     * Adds a DateInfoHolder object to the list of date info objects.
+     * @param dateInfoHolder the date info object
+     */
     public void addItem(DateInfoHolder dateInfoHolder)
     {
         GRID_CELL_INFO_LIST.add(dateInfoHolder);
@@ -66,7 +73,8 @@ public class GridCellAdapter extends BaseAdapter
 
     /**
      * Method getCount
-     * Returns the size of the list containing DateInfoHolder objects.
+     * Returns the size of the list containing DateInfoHolder objects. Note: this method is required
+     * to be implemented, but is not used.
      * @return the size of the list
      */
     @Override
@@ -90,6 +98,7 @@ public class GridCellAdapter extends BaseAdapter
     /**
      * Method: getItemId
      * Returns the id of the cell at a specified position. Here, the id is the same as the position.
+     * Note: this method is required to be implemented, but is not used.
      * @param position the specified cell position
      * @return position the id of the specified cell
      */
@@ -101,7 +110,7 @@ public class GridCellAdapter extends BaseAdapter
 
     /**
      * Method: getView
-     * Returns the view of a single cell in the calendar grid.
+     * Returns the view of a single cell that represents a day in the calendar grid.
      * @param position the position of the cell
      * @param convertView the cell view used to inflate the layout
      * @param parent the cell's parent view (the grid view)
@@ -148,14 +157,19 @@ public class GridCellAdapter extends BaseAdapter
 
     /**
      * Method: getSelectedDate
-     * Returns the day that has been selected/clicked on by the user.
-     * @return the selected day
+     * Returns the date that has been selected/clicked on by the user.
+     * @return the selected date
      */
     public String getSelectedDate()
     {
         return selectedDate;
     }
 
+    /**
+     * Method: setSelectedDate
+     * Sets the selected date to the String date passed.
+     * @param selectedDate the date to set as selected
+     */
     public void setSelectedDate(String selectedDate)
     {
         this.selectedDate = selectedDate;
