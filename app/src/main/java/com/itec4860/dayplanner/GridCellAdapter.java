@@ -11,8 +11,6 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 /**Class: GridCellAdapter
@@ -28,89 +26,44 @@ import java.util.List;
 
 public class GridCellAdapter extends BaseAdapter implements View.OnClickListener
 {
-    private int currentDayOfMonth;
+    private final Context CONTEXT;
+    private final List<DateInfoHolder> GRID_CELL_INFO_LIST = new ArrayList<DateInfoHolder>();
+
+    private int currentDay;
     private int selectedDay;
 
-    private final Context CONTEXT;
-    private final List<String> GRID_CELL_INFO_LIST = new ArrayList<String>();
-    private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
-            "August", "September", "October", "November", "December"};
-    private final int[] DAYS_OF_MONTH = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    private final String CURRENT_DATE_COLOR = "white";
-    private final String CURRENT_MONTH_DATE_COLOR = "black";
-    private final String NEXT_OR_PREV_MONTH_DATE_COLOR = "lightgrey";
-
     /**
      * Constructor: GridCellAdapter
      * Constructs an adapter to populate each day in a calendar grid.
      * @param context the Day Planner application environment
-     * @param day the current day
-     * @param month the current month
-     * @param year the current year
      */
-    public GridCellAdapter(Context context, int day, int month, int year)
+    public GridCellAdapter(Context context, int currentDay)
     {
         super();
-
         this.CONTEXT = context;
-        currentDayOfMonth = day;
-
-        fillCalendar(month, year);
+        this.currentDay = currentDay;
     }
 
     /**
      * Constructor: GridCellAdapter
      * Constructs an adapter to populate each day in a calendar grid.
      * @param context the Day Planner application environment
-     * @param day the current day
-     * @param month the current month
-     * @param year the current year
      * @param selectedDay the day to display as selected
      */
-    public GridCellAdapter(Context context, int day, int month, int year, int selectedDay)
+    public GridCellAdapter(Context context, int currenday, int selectedDay)
     {
         super();
-
         this.CONTEXT = context;
-        currentDayOfMonth = day;
+        this.currentDay = currenday;
         this.selectedDay = selectedDay;
 
-        fillCalendar(month, year);
+        //TODO fillCalendar(month, year);
     }
 
-    /**
-     * Method: getMonthName
-     * Returns the name of a month that is specified by the month number.
-     * @param monthByNum the number of the desired month
-     * @return the name of the month
-     */
-    private String getMonthName(int monthByNum)
+    public void addItem(DateInfoHolder dateInfoHolder)
     {
-        return MONTHS[monthByNum - 1];
+        GRID_CELL_INFO_LIST.add(dateInfoHolder);
     }
-
-    /**
-     * Method: getMonthTotalDays
-     * Returns the total number of days in a month specified by the month number.
-     * @param monthByNum the number of the desired month
-     * @return the number of days
-     */
-    private int getMonthTotalDays(int monthByNum)
-    {
-        return DAYS_OF_MONTH[monthByNum - 1];
-    }
-
-    public int getSelectedDay()
-    {
-        return selectedDay;
-    }
-
-    private void setSelectedDay(int day)
-    {
-        selectedDay = day;
-    }
-
-
 
     //TODO
     @Override
@@ -121,111 +74,9 @@ public class GridCellAdapter extends BaseAdapter implements View.OnClickListener
 
     //TODO
     @Override
-    public String getItem(int position)
+    public DateInfoHolder getItem(int position)
     {
         return GRID_CELL_INFO_LIST.get(position);
-    }
-
-    /**
-     * Class: ViewHolder
-     * To hold each calendar day's related info.
-     */
-    static class DateInfoHolder
-    {
-        protected String month;
-        protected String day;
-        protected String year;
-        protected String date;
-        protected ImageButton selectedDayIndicator;
-    }
-
-    /**
-     * Method: fillCalendar
-     * Fills the calendar grid with cells representing each day in a month in a given year.
-     * @param currentMonthNum the current or specified month
-     * @param currentYear the current of specified year
-     */
-    private void fillCalendar(int currentMonthNum, int currentYear)
-    {
-        int numOfLeadingDays;
-        int daysInPrevMonth;
-        int prevMonth;
-        int yearOfPrevMonth;
-        int nextMonth;
-        int yearOfNextMonth;
-        int daysInCurrentMonth = getMonthTotalDays(currentMonthNum);
-
-        // adjusted currentMonthNum by -1 for GregorianCalendar compatibility
-        GregorianCalendar calendar = new GregorianCalendar(currentYear, currentMonthNum - 1, 1);
-
-        if (currentMonthNum == 12)
-        {
-            prevMonth = currentMonthNum - 1;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-            nextMonth = 1;
-            yearOfPrevMonth = currentYear;
-            yearOfNextMonth = currentYear + 1;
-        }
-
-        else if (currentMonthNum == 1)
-        {
-            prevMonth = 12;
-            yearOfPrevMonth = currentYear - 1;
-            yearOfNextMonth = currentYear;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-            nextMonth = 2;
-        }
-
-        else
-        {
-            prevMonth = currentMonthNum - 1;
-            nextMonth = currentMonthNum + 1;
-            yearOfNextMonth = currentYear;
-            yearOfPrevMonth = currentYear;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-        }
-
-        if (calendar.isLeapYear(currentYear) && currentMonthNum == 2)
-        {
-            daysInCurrentMonth++;
-        }
-
-        numOfLeadingDays = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-        //calculate the 'day of the month' for each day of the previous month that leads into the
-        //first week of the current month and add info for those days to the cell info list
-        for (int i = 1; i <= numOfLeadingDays; i++)
-        {
-            int leadingDayOfMonth = daysInPrevMonth - numOfLeadingDays + i;
-
-            GRID_CELL_INFO_LIST.add(NEXT_OR_PREV_MONTH_DATE_COLOR + "-" + String.valueOf(leadingDayOfMonth)
-                    + "-" + getMonthName(prevMonth) + "-" + yearOfPrevMonth);
-        }
-
-        //add info for each day of the current month to the cell info list
-        for (int i = 0; i < daysInCurrentMonth; i++)
-        {
-            if (i == currentDayOfMonth)
-            {
-                GRID_CELL_INFO_LIST.add(CURRENT_DATE_COLOR + "-" + String.valueOf(i)
-                        + "-" + getMonthName(currentMonthNum) + "-" + currentYear);
-            }
-
-            else
-            {
-                GRID_CELL_INFO_LIST.add(CURRENT_MONTH_DATE_COLOR + "-" + String.valueOf(i + 1)
-                        + "-" + getMonthName(currentMonthNum) + "-" + currentYear);
-            }
-        }
-
-        //TODO: FIND OUT WHY THIS WORKS!!! should not complete loop, should be 1 short
-        //add info for each day of the next month that trails out of the last week of the current
-        //month to the cell info list
-        for (int i = 0; i < GRID_CELL_INFO_LIST.size() % 7; i++)
-        {
-            GRID_CELL_INFO_LIST.add(NEXT_OR_PREV_MONTH_DATE_COLOR + "-" + String.valueOf(i + 1)
-                    + "-" + getMonthName(nextMonth) + "-" + yearOfNextMonth);
-        }
     }
 
     /**
@@ -259,47 +110,34 @@ public class GridCellAdapter extends BaseAdapter implements View.OnClickListener
             cell = inflater.inflate(R.layout.grid_cell, parent, false);
         }
 
+        final DateInfoHolder dateInfoHolder = GRID_CELL_INFO_LIST.get(position);
+        dateInfoHolder.setSelectedDayIndicator((ImageButton) cell.findViewById(R.id.selectedDayIndicator));
+
         Button gridCell = (Button) cell.findViewById(R.id.calendarDayGridCell);
+        gridCell.setTextColor(Color.parseColor(dateInfoHolder.getDateColor()));
+        gridCell.setText(dateInfoHolder.getDay());
+        gridCell.setTag(dateInfoHolder);
         gridCell.setOnClickListener(this);
 
-        String[] gridCellInfo = GRID_CELL_INFO_LIST.get(position).split("-");
-        String gridCellDateColor = gridCellInfo[0];
-
-        final DateInfoHolder dateInfoHolder = new DateInfoHolder();
-        dateInfoHolder.day = gridCellInfo[1];
-        dateInfoHolder.month = gridCellInfo[2];
-        dateInfoHolder.year = gridCellInfo[3];
-        dateInfoHolder.selectedDayIndicator = (ImageButton) cell.findViewById(R.id.selectedDayIndicator);
-        dateInfoHolder.date = dateInfoHolder.month + " " + dateInfoHolder.day + ", " + dateInfoHolder.year;
-
-        gridCell.setText(dateInfoHolder.day);
-        gridCell.setTag(dateInfoHolder);
-
-        if (gridCellDateColor.equals(NEXT_OR_PREV_MONTH_DATE_COLOR))
-        {
-            gridCell.setTextColor(Color.parseColor(NEXT_OR_PREV_MONTH_DATE_COLOR));
-        }
-
-        if (gridCellDateColor.equals(CURRENT_MONTH_DATE_COLOR))
-        {
-            gridCell.setTextColor(Color.parseColor(CURRENT_MONTH_DATE_COLOR));
-        }
-
-        if (gridCellDateColor.equals(CURRENT_DATE_COLOR))
+        if (dateInfoHolder.getDay().equals(String.valueOf(currentDay)))
         {
             gridCell.setTextAppearance(CONTEXT, android.R.style.TextAppearance_Large);
-            gridCell.setTextColor(Color.parseColor(CURRENT_DATE_COLOR));
-            dateInfoHolder.selectedDayIndicator.setImageResource(R.drawable.circle_solid);
+            dateInfoHolder.getSelectedDayIndicator().setImageResource(R.drawable.circle_solid);
         }
 
-        if (Integer.parseInt(dateInfoHolder.day) == selectedDay)
+        if (Integer.parseInt(dateInfoHolder.getDay()) == selectedDay)
         {
-            dateInfoHolder.selectedDayIndicator.setFocusable(true);
-            dateInfoHolder.selectedDayIndicator.setFocusableInTouchMode(true);
-            dateInfoHolder.selectedDayIndicator.requestFocus();
+            dateInfoHolder.getSelectedDayIndicator().setFocusable(true);
+            dateInfoHolder.getSelectedDayIndicator().setFocusableInTouchMode(true);
+            dateInfoHolder.getSelectedDayIndicator().requestFocus();
         }
 
         return cell;
+    }
+
+    public int getSelectedDay()
+    {
+        return selectedDay;
     }
 
     /**
@@ -307,16 +145,16 @@ public class GridCellAdapter extends BaseAdapter implements View.OnClickListener
      * Will eventually perform calendar specific functions, such as create a new calendar event.
      * @param view the cell that was clicked
      */
-    @Override
+   //TODO @Override
     public void onClick(View view)
     {
         DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
-        dateInfoHolder.selectedDayIndicator.setFocusable(true);
-        dateInfoHolder.selectedDayIndicator.setFocusableInTouchMode(true);
-        dateInfoHolder.selectedDayIndicator.requestFocus();
+        dateInfoHolder.getSelectedDayIndicator().setFocusable(true);
+        dateInfoHolder.getSelectedDayIndicator().setFocusableInTouchMode(true);
+        dateInfoHolder.getSelectedDayIndicator().requestFocus();
 
-        Toast.makeText(CONTEXT, dateInfoHolder.date, Toast.LENGTH_SHORT).show();
+        Toast.makeText(CONTEXT, dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
 
-        setSelectedDay(Integer.parseInt(dateInfoHolder.day));
+        selectedDay = Integer.parseInt(dateInfoHolder.getDay());
     }
 }
