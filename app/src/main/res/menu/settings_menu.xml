@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.itec4860.dayplanner.CalendarActivity">
+
+    <item android:id="@+id/shareCalendar"
+          android:title="Share Calendar"/>
+
+    <item android:id="@+id/displayNationalHolidays"
+          android:title="Display National Holidays" />
+
+</menu>

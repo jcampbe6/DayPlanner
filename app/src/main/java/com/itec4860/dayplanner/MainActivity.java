@@ -1,6 +1,8 @@
 package com.itec4860.dayplanner;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 /**Class: MainActivity
@@ -17,19 +19,36 @@ import android.os.Bundle;
  * mobile device application is first initiated by a user of the application.
  */
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity
+{
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
-        //check for registration status
-        //then switch to the appropriate screen/activity
+        /**
+         * Registration status will be saved in the user's preferences as a boolean 'isRegistered',
+         * and will be retrieved for verification.
+         */
 
-        //NOTE: it currently sets the view to the default 'activity_main' with a 'Hello World'
-        //text view - I will change this
+        /*SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
+        boolean isRegistered = dayPlannerSettings.getBoolean("isRegistered", false);
+        */
 
-        setContentView(R.layout.activity_main);
+        boolean isRegistered = true; // for testing purposes until registration is implemented
+
+        if (isRegistered)
+        {
+            Intent viewCalendarIntent = new Intent(getApplicationContext(), CalendarActivity.class);
+            startActivity(viewCalendarIntent);
+            finish();
+        }
+
+        else
+        {
+            // switch to registration screen
+        }
     }
 
 }
