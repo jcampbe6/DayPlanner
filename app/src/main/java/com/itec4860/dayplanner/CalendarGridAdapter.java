@@ -131,7 +131,7 @@ public class CalendarGridAdapter extends BaseAdapter
         dateInfoHolder.setSelectedDayImage((ImageView) cell.findViewById(R.id.selectedDayImage));
 
         TextView gridCellText = (TextView) cell.findViewById(R.id.calendarDayText);
-        gridCellText.setTextColor(Color.parseColor(dateInfoHolder.getDateColor()));
+        gridCellText.setTextColor(Color.parseColor(dateInfoHolder.getDateTextColor()));
         gridCellText.setText(dateInfoHolder.getDay());
 
         if (dateInfoHolder.getDay().equals(String.valueOf(today)))

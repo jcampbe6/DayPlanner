@@ -89,14 +89,13 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         {
             month = savedInstanceState.getInt(STATE_MONTH);
             year = savedInstanceState.getInt(STATE_YEAR);
-
             updateCurrentDay();
-            calendar.set(year, month - 1, currentDay);
+            setCalendarInstanceToNewDate(year, month, currentDay);
         }
 
         else
         {
-            setCurrentDateInfo();
+            setCalendarToCurrentDate();
         }
 
         currentMonthTitle = (TextView) this.findViewById(R.id.currentMonthTitle);
@@ -126,7 +125,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
-                highlightSelectedDate(dateInfoHolder);
+                markSelectedDate(dateInfoHolder);
 
                 // for testing
                 Toast.makeText(getApplicationContext(), dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
@@ -135,14 +134,24 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     }
 
     /**
-     * Method: setCurrentDateInfo
+     * Method: setCalendarToCurrentDate
      * Sets the month, day, and year for the current month.
      */
-    private void setCurrentDateInfo()
+    private void setCalendarToCurrentDate()
     {
         month = calendar.get(Calendar.MONTH) + 1;
         currentDay = calendar.get(Calendar.DAY_OF_MONTH);
         year = calendar.get(Calendar.YEAR);
+    }
+
+    /**
+     * Method: setCalendarInstanceToNewDate
+     * Sets the year, month, and day of the application's calendar instance from which the
+     * calendar user interface is made up.
+     */
+    private void setCalendarInstanceToNewDate(int year, int month, int day)
+    {
+        calendar.set(year, month - 1, day);
     }
 
     /**
@@ -158,11 +167,11 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     }
 
     /**
-     * Method: highlightSelectedDate
+     * Method: markSelectedDate
      * Highlights the selected date.
      * @param dateInfoHolder the source of the selected date info to highlight
      */
-    private void highlightSelectedDate(DateInfoHolder dateInfoHolder)
+    private void markSelectedDate(DateInfoHolder dateInfoHolder)
     {
         adapter.setSelectedDate(dateInfoHolder.getDate());
         adapter.notifyDataSetChanged();
@@ -343,7 +352,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 
         DateInfoHolder dateInfoHolder = adapter.getItem(info.position);
-        highlightSelectedDate(dateInfoHolder);
+        markSelectedDate(dateInfoHolder);
 
         MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.selected_date_options_menu, menu);
@@ -421,7 +430,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     {
         updateCurrentDay();
         adapter = new CalendarGridAdapter(getApplicationContext(), currentDay);
-        calendar.set(year, month - 1, currentDay);
+        setCalendarInstanceToNewDate(year, month, currentDay);
+        //calendar.set(year, month - 1, currentDay);
         formatCalendarTitle();
         fillCalendar(currentDay, month, year);
         adapter.notifyDataSetChanged();
