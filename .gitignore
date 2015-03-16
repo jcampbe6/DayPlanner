@@ -1,3 +1,12 @@
+# Added by Android Studio
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+
+# Local Version Control System (VCS) file
+/.idea/vcs.xml
+
 # Built application files
 *.apk
 *.ap_
