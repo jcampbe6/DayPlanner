@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<color name="white">#FFFFFF</color>
-	<color name="black">#000000</color>
+    <!-- Colors for the days of the month -->
+	<color name="todaysDateColor">#FFFFFF</color>
+	<color name="currentMonthDateColor">#000000</color>
+    <color name="nextAndPrevMonthDateColor">#D3D3D3</color>
+
+
     <color name="brown">#4B3A2D</color>
     <color name="lt_brown">#5d4e42</color>
     <color name="green">#20B035</color>
