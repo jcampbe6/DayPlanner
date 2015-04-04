@@ -1,10 +1,11 @@
 package com.itec4860.dayplanner;
 
+import android.graphics.Color;
 import android.widget.ImageView;
 
 /**Class: DateInfoHolder
  * @author Joshua Campbell
- * @version 1.0
+ * @version 1.1
  * Course: ITEC 4860 Spring 2015
  * Written: March 10, 2015
  *
@@ -20,7 +21,7 @@ public class DateInfoHolder
     private String month;
     private String day;
     private String year;
-    private String textColor;
+    private int textColor;
     private ImageView selectedDayImage;
 
     /**
@@ -32,7 +33,7 @@ public class DateInfoHolder
      * @param year the year
      * @param textColor the text color
      */
-    public DateInfoHolder(String month, String day, String year, String textColor)
+    public DateInfoHolder(String month, String day, String year, int textColor)
     {
         this.month = month;
         this.day = day;
@@ -75,7 +76,7 @@ public class DateInfoHolder
         return month + " " + day + ", " + year;
     }
 
-    public String getDateTextColor()
+    public int getDateTextColor()
     {
         return textColor;
     }

@@ -14,7 +14,7 @@ import java.util.List;
 
 /**Class: CalendarGridAdapter
  * @author Joshua Campbell
- * @version 1.0
+ * @version 1.1
  * Course: ITEC 4860 Spring 2015
  * Written: March 6, 2015
  *
@@ -30,34 +30,34 @@ public class CalendarGridAdapter extends BaseAdapter
     private final Context CONTEXT;
     private final List<DateInfoHolder> GRID_CELL_INFO_LIST = new ArrayList<DateInfoHolder>();
 
-    private int today;
+    private String todaysDate;
     private String selectedDate;
 
     /**
      * Constructor: CalendarGridAdapter
      * Constructs an adapter to populate each day in a calendar grid.
      * @param context the Day Planner application environment
-     * @param today today's date
+     * @param todaysDate today's date
      */
-    public CalendarGridAdapter(Context context, int today)
+    public CalendarGridAdapter(Context context, String todaysDate)
     {
         super();
         this.CONTEXT = context;
-        this.today = today;
+        this.todaysDate = todaysDate;
     }
 
     /**
      * Constructor: CalendarGridAdapter
      * Constructs an adapter to populate each day in a calendar grid.
      * @param context the Day Planner application environment
-     * @param today today's date
+     * @param todaysDate today's date
      * @param selectedDate the day to display as selected
      */
-    public CalendarGridAdapter(Context context, int today, String selectedDate)
+    public CalendarGridAdapter(Context context, String todaysDate, String selectedDate)
     {
         super();
         this.CONTEXT = context;
-        this.today = today;
+        this.todaysDate = todaysDate;
         this.selectedDate = selectedDate;
     }
 
@@ -131,13 +131,14 @@ public class CalendarGridAdapter extends BaseAdapter
         dateInfoHolder.setSelectedDayImage((ImageView) cell.findViewById(R.id.selectedDayImage));
 
         TextView gridCellText = (TextView) cell.findViewById(R.id.calendarDayText);
-        gridCellText.setTextColor(Color.parseColor(dateInfoHolder.getDateTextColor()));
+        gridCellText.setTextColor(dateInfoHolder.getDateTextColor());
         gridCellText.setText(dateInfoHolder.getDay());
 
-        if (dateInfoHolder.getDay().equals(String.valueOf(today)))
+        if (dateInfoHolder.getDate().equals(todaysDate))
         {
-            gridCellText.setTextAppearance(CONTEXT, android.R.style.TextAppearance_Large);
             dateInfoHolder.getSelectedDayImage().setImageResource(R.drawable.circle_solid);
+            gridCellText.setTextColor(CONTEXT.getResources().getColor(R.color.todaysDateColor));
+
         }
 
         else if (dateInfoHolder.getDate().equalsIgnoreCase(selectedDate))
