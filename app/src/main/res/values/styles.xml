@@ -6,12 +6,19 @@
         <item name="actionBarStyle">@style/MyActionBar</item>
     </style>
 
+    <!-- Style for the action bar -->
     <style name="MyActionBar" parent="@style/Widget.AppCompat.ActionBar">
         <item name="background">@drawable/action_bar_background</item>
         <item name="logo">@mipmap/ic_launcher</item>
         <item name="displayOptions">useLogo|showHome</item>
     </style>
 
+    <!-- Style for fullscreen activity -->
+    <style name="Theme.AppCompat.Light.NoTitleBar.FullScreen" parent="AppTheme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
 
     <style name="calendar_event_style" parent="@android:style/TextAppearance.Small">
         <item name="android:textColor">#FF6600</item>
