@@ -31,6 +31,10 @@
             android:name=".LoginActivity"
             android:theme="@style/Theme.AppCompat.Light.NoTitleBar.FullScreen" >
         </activity>
+        <activity
+            android:name=".CalendarActivityWeekly"
+            android:label="@string/title_activity_calendar_activity_weekly" >
+        </activity>
     </application>
 
 </manifest>
