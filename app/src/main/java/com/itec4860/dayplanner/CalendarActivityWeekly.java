@@ -76,7 +76,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
                 R.array.toggle_calendar_options_list, R.layout.action_bar_dropdown_item);
         actionBar.setListNavigationCallbacks(spinnerAdapter, this);
 
-        // sets spinner selection to 'Month'
+        // sets spinner selection to 'Week'
         actionBar.setSelectedNavigationItem(1);
 
         prevWeekButton = (ImageButton) this.findViewById(R.id.prevWeek);
@@ -274,7 +274,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         int nextMonth;
         int yearOfNextMonth;
         int daysInCurrentMonth = getMonthTotalDays(currentMonthNum);
-
         int currentWeek;
         int currentWeekMonth;
         int currentJulianDay;
