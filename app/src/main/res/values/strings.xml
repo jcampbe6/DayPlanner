@@ -7,5 +7,9 @@
         <item>Week</item>
         <item>Day</item>
     </string-array>
+    <string name="title_activity_calendar_activity_weekly">CalendarActivityWeekly</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 
 </resources>
