@@ -52,6 +52,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     private int month;
     private int week;
     private int year;
+    private String currentDate;
     private boolean navItemSelectedOnCreate;
 
     private static final String CALENDAR_TITLE_DATE_FORMAT = "MMMM yyyy";
@@ -113,13 +114,13 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DAY))
         {
-            adapter = new CalendarGridAdapter(getApplicationContext(), currentDay,
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate,
                     savedInstanceState.getString(STATE_SELECTED_DAY));
         }
 
         else
         {
-            adapter = new CalendarGridAdapter(getApplicationContext(), currentDay);
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
         }
 
         fillCalendarWeek(currentDay, month, year);
@@ -365,30 +366,29 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
                 int leadingDayOfMonth = daysInPrevMonth - numOfLeadingDays + i;
 
                 adapter.addItem(new DateInfoHolder(getMonthName(prevMonth), String.valueOf(leadingDayOfMonth),
-                        String.valueOf(yearOfPrevMonth), NEXT_AND_PREV_MONTH_DATE_COLOR));
+                        String.valueOf(yearOfPrevMonth), getApplicationContext().getResources()
+                        .getColor(R.color.nextAndPrevMonthDateColor)));
             }
         }
 
         //add info for each day of the current month to the cell info list
-        for (int i = 1; i <= daysInCurrentMonth; i++)
-        {
-            if (i >= startOfWeekDay && i <= endOfWeekDay) {
-                if (i == currentDayOfMonth) {
-                    adapter.addItem(new DateInfoHolder(getMonthName(currentMonthNum), String.valueOf(i),
-                            String.valueOf(currentYear), TODAY_DATE_COLOR));
-                } else {
-                    adapter.addItem(new DateInfoHolder(getMonthName(currentMonthNum), String.valueOf(i),
-                            String.valueOf(currentYear), CURRENT_MONTH_DATE_COLOR));
-                }
-            }
+        for (int i = 1; i <= daysInCurrentMonth; i++) {
+        if (i >= startOfWeekDay && i <= endOfWeekDay) {
+
+            adapter.addItem(new DateInfoHolder(getMonthName(currentMonthNum), String.valueOf(i),
+                    String.valueOf(currentYear), getApplicationContext().getResources()
+                    .getColor(R.color.currentMonthDateColor)));
+
         }
+    }
 
         //add info for each day of the next month that trails out of the last week of the current
         //month to the cell info list
         if (currentWeekMonth == 5 && (endOfWeekDay - startOfWeekDay) < 6) {
             for (int i = 0; i < adapter.getCount() % 7; i++) {
                 adapter.addItem(new DateInfoHolder(getMonthName(nextMonth), String.valueOf(i + 1),
-                        String.valueOf(yearOfNextMonth), NEXT_AND_PREV_MONTH_DATE_COLOR));
+                        String.valueOf(yearOfNextMonth), getApplicationContext().getResources()
+                        .getColor(R.color.nextAndPrevMonthDateColor)));
             }
         }
     }
@@ -541,7 +541,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
         if (currentDay != oldDay)
         {
-            adapter = new CalendarGridAdapter(getApplicationContext(), currentDay);
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
             fillCalendarWeek(currentDay, month, year);
             adapter.notifyDataSetChanged();
             calendarGridWeek.setAdapter(adapter);
@@ -558,7 +558,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     private void setCalendarMonthYear(int month, int year)
     {
         updateCurrentDay();
-        adapter = new CalendarGridAdapter(getApplicationContext(), currentDay);
+        adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
         setCalendarInstanceToNewDate(year, month, currentDay);
         //calendar.set(year, month - 1, currentDay);
         formatCalendarTitleW();
