@@ -298,18 +298,8 @@ public class RegisterActivity extends Activity
             passwordEditText.setError("Must enter a password");
             return false;
         }
-
-        String passwordStrengthRegex = "(?=^.{8,}$)(?=.*[A-Z])(?=.*[!@#$%]+).*$";
-
-        if (!password.matches(passwordStrengthRegex))
-        {
-            passwordEditText.setError("Password must:\n" +
-                    "- be at least 8 characters long\n" +
-                    "- contain at least 1 uppercase letter\n" +
-                    "- contain at least 1 special character (!@#$%)");
-
-            return false;
-        }
+        
+        // TODO: add validation for strong password (what is a strong password - check SRS)
 
         return true;
     }
