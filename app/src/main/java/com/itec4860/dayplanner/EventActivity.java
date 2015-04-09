@@ -15,9 +15,9 @@ import android.widget.Toast;
 /**
  * Created by Timothy on 4/8/2015.
  */
-public class ProjectActivity extends Activity{
+public class EventActivity extends Activity{
 
-    private Spinner projectTypeSpinner;
+    private Spinner eventTypeSpinner;
     private Button saveButton;
 
     @Override
@@ -33,7 +33,7 @@ public class ProjectActivity extends Activity{
     // add items into spinner dynamically
     public void addItemsOnSpinner() {
 
-        projectTypeSpinner = (Spinner) findViewById(R.id.projectTypeSpinner);
+        eventTypeSpinner = (Spinner) findViewById(R.id.eventTypeSpinner);
         List<String> list = new ArrayList<String>();
         list.add("Month");
         list.add("Week");
@@ -41,18 +41,18 @@ public class ProjectActivity extends Activity{
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        projectTypeSpinner.setAdapter(dataAdapter);
+        eventTypeSpinner.setAdapter(dataAdapter);
     }
 
     public void addListenerOnSpinnerItemSelection() {
-        projectTypeSpinner = (Spinner) findViewById(R.id. projectTypeSpinner);
-        projectTypeSpinner.setOnItemSelectedListener(new CustomProjectTypeListener());
+        eventTypeSpinner = (Spinner) findViewById(R.id.eventTypeSpinner);
+        eventTypeSpinner.setOnItemSelectedListener(new CustomProjectTypeListener());
     }
 
     // get the selected dropdown list value
     public void addListenerOnButton() {
 
-        projectTypeSpinner = (Spinner) findViewById(R.id.projectTypeSpinner);
+        eventTypeSpinner = (Spinner) findViewById(R.id.eventTypeSpinner);
 
 //the save button doesn't do anything important right now
         saveButton.setOnClickListener(new OnClickListener() {
@@ -60,12 +60,13 @@ public class ProjectActivity extends Activity{
             @Override
             public void onClick(View v) {
 
-                Toast.makeText(ProjectActivity.this,
-                        "OnClickListener : " + "\nProject Type: " +
-                                String.valueOf(projectTypeSpinner.getSelectedItem()),
+                Toast.makeText(EventActivity.this,
+                        "OnClickListener : " + "\nEvent Type: " +
+                                String.valueOf(eventTypeSpinner.getSelectedItem()),
                         Toast.LENGTH_SHORT).show();
             }
 
         });
     }
+
 }
