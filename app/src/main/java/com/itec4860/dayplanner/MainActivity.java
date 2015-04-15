@@ -28,17 +28,13 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
 
         /**
-         * Registration status will be saved in the user's preferences as a boolean 'isRegistered',
+         * Registration status will be saved in the user's preferences as a boolean 'isUserRegistered',
          * and will be retrieved for verification.
          */
+        SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
+        boolean isUserRegistered = dayPlannerSettings.getBoolean("isUserRegistered", false);
 
-        /*SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
-        boolean isRegistered = dayPlannerSettings.getBoolean("isRegistered", false);
-        */
-
-        boolean isRegistered = true; // for testing purposes until registration is implemented
-
-        if (isRegistered)
+        if (isUserRegistered)
         {
             Intent viewCalendarIntent = new Intent(getApplicationContext(), CalendarActivity.class);
             startActivity(viewCalendarIntent);
@@ -47,7 +43,9 @@ public class MainActivity extends Activity
 
         else
         {
-            // switch to registration screen
+            Intent registrationIntent = new Intent(getApplicationContext(), RegisterActivity.class);
+            startActivity(registrationIntent);
+            finish();
         }
     }
 
