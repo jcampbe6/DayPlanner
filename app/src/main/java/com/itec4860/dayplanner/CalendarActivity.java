@@ -277,10 +277,20 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         //TODO: handle settings menu selections here
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.shareCalendar)
         {
-            return true;
+            Toast.makeText(getApplicationContext(), "Share Calendar", Toast.LENGTH_SHORT).show();
+        }
+
+        if (id == R.id.displayNationalHolidays)
+        {
+            Toast.makeText(getApplicationContext(), "Display National Holidays", Toast.LENGTH_SHORT).show();
+        }
+
+        if (id == R.id.goToCurrentDate)
+        {
+            setCalendarToCurrentDate();
+            displayMonthYear(month, year);
         }
 
         return super.onOptionsItemSelected(item);
@@ -400,13 +410,13 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     }
 
     /**
-     * Method: setCalendarMonthYear
+     * Method: displayMonthYear
      * Sets the current calendar's month and year and updates the CalendarGridAdapter to the new month
      * and year to display the proper dates in each cell of the calendar.
      * @param month the new month
      * @param year the new year
      */
-    private void setCalendarMonthYear(int month, int year)
+    private void displayMonthYear(int month, int year)
     {
         updateCurrentDay();
         adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
@@ -470,7 +480,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
                 month--;
             }
 
-            setCalendarMonthYear(month, year);
+            displayMonthYear(month, year);
         }
 
         if (view == nextMonthButton)
@@ -486,7 +496,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
                 month++;
             }
 
-            setCalendarMonthYear(month, year);
+            displayMonthYear(month, year);
         }
     }
 }
