@@ -3,10 +3,17 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.itec4860.dayplanner.CalendarActivity">
 
+    <item android:id="@+id/goToCurrentDate"
+          android:title="Current Date"
+          android:icon="@drawable/calendar_home"
+          app:showAsAction="ifRoom" />
+
     <item android:id="@+id/shareCalendar"
-          android:title="Share calendar"/>
+          android:title="Share calendar"
+          app:showAsAction="never" />
 
     <item android:id="@+id/displayNationalHolidays"
-          android:title="Display holidays" />
+          android:title="Display national holidays"
+          app:showAsAction="never" />
 
 </menu>
