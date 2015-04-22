@@ -50,7 +50,6 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private int month;
     private int year;
     private String currentDate;
-    private boolean navItemSelectedOnCreate;
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
@@ -68,13 +67,14 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         super.onCreate(savedInstanceState);
         setContentView(R.layout.calendar_month);
 
-        navItemSelectedOnCreate = true;
-
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         SpinnerAdapter spinnerAdapter = ArrayAdapter.createFromResource(getApplicationContext(),
                 R.array.toggle_calendar_options_list, R.layout.action_bar_dropdown_item);
         actionBar.setListNavigationCallbacks(spinnerAdapter, this);
+
+        // sets spinner selection to 'Month'
+        actionBar.setSelectedNavigationItem(0);
 
         prevMonthButton = (ImageButton) this.findViewById(R.id.prevMonth);
         prevMonthButton.setOnClickListener(this);
@@ -309,27 +309,25 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     public boolean onNavigationItemSelected(int itemPosition, long itemId)
     {
         //TODO: handle calendar view drop down menu selections here
-        if (navItemSelectedOnCreate)
+
+        Intent thisActivity = getIntent();
+
+        if (thisActivity.hasExtra("prevActivityPosition") &&
+                Integer.parseInt(thisActivity.getStringExtra("prevActivityPosition")) == itemPosition)
         {
-            if (itemPosition == 1){
-                navItemSelectedOnCreate = true;
-                Intent viewCalendarIntentW = new Intent(getApplicationContext(), CalendarActivityWeekly.class);
-                startActivity(viewCalendarIntentW);
-                finish();
-            }
-            else {
-                navItemSelectedOnCreate = false;
-                return true;
-            }
+            onBackPressed();
         }
 
-        String[] itemTitles = getResources().getStringArray(R.array.toggle_calendar_options_list);
-
-        if (itemPosition < itemTitles.length)
+        else if (itemPosition == 1)
         {
-            // for testing
-            Toast.makeText(getApplicationContext(), itemTitles[itemPosition], Toast.LENGTH_SHORT).show();
-            return true;
+            Intent weekIntent = new Intent(getApplicationContext(), CalendarActivityWeekly.class);
+            weekIntent.putExtra("prevActivityPosition", "0");
+            startActivity(weekIntent);
+        }
+
+        else if (itemPosition == 2)
+        {
+            Toast.makeText(getApplicationContext(), "Day", Toast.LENGTH_SHORT).show();
         }
 
         return true;
@@ -507,5 +505,12 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
             displayMonthYear(month, year);
         }
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        getSupportActionBar().setSelectedNavigationItem(0);
     }
 }
