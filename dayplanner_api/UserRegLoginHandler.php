@@ -1,18 +1,17 @@
 <?php
 
 /**
- * Class DayPlannerDatabaseHandler
+ * Class: UserRegLoginHandler
  * @author Joshua Campbell
  * @version 1.0
  * Course: ITEC 4860 Spring 2015
  * Written: March 23, 2015
  *
- * This class will handle transactions with the Day Planner database, such as
- * user existence verification, user registration, and user authentication. This
- * class will eventually provide functionality to save and retrieve calendar
- * event data.
+ * This class will handle user registration and login related transactions with the Day Planner
+ * database, such as user existence verification, user registration, user authentication, and
+ * user login.
  */
-class DayPlannerDatabaseHandler
+class UserRegLoginHandler
 {
 	private $dbConnection;
 	
