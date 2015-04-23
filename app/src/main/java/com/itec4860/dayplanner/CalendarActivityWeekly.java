@@ -18,7 +18,6 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -46,7 +45,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     private ImageButton nextWeekButton;
     private GridView calendarGridWeek;
     private CalendarGridAdapter adapter;
-    private Calendar calendar;
     private int oldDay;
     private int currentDay;
     private int month;
@@ -54,7 +52,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     private int year;
     private String currentDate;
 
-    private static final String CALENDAR_TITLE_DATE_FORMAT = "MMMM yyyy";
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
     private final int[] DAYS_OF_THE_MONTHS = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
@@ -87,16 +84,12 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         nextWeekButton = (ImageButton) this.findViewById(R.id.nextWeek);
         nextWeekButton.setOnClickListener(this);
 
-
-        calendar = Calendar.getInstance(Locale.getDefault());
-
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_WEEK))
         {
             month = savedInstanceState.getInt(STATE_MONTH);
             year = savedInstanceState.getInt(STATE_YEAR);
             week = savedInstanceState.getInt(STATE_WEEK);
             updateCurrentDay();
-            setCalendarInstanceToNewDate(year, month, currentDay);
         }
 
         else
@@ -105,7 +98,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         }
 
         currentMonthTitle = (TextView) this.findViewById(R.id.currentMonthTitle);
-        formatCalendarTitleW();
+        setCalendarTitle();
 
         calendarGridWeek = (GridView) this.findViewById(R.id.calendarGridWeek);
         registerForContextMenu(calendarGridWeek);
@@ -122,7 +115,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
             adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
         }
 
-        fillCalendarWeek(currentDay, month, year);
+        fillCalendarWeek(month, year);
         adapter.notifyDataSetChanged();
         calendarGridWeek.setAdapter(adapter);
 
@@ -132,9 +125,9 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
-                markSelectedDate(dateInfoHolder);
+                markSelectedDate(dateInfoHolder.getDate());
 
-                // for testing
+                // TODO: for testing
                 Toast.makeText(getApplicationContext(), dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -146,20 +139,12 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
      */
     private void setCalendarToCurrentDate()
     {
-        month = calendar.get(Calendar.MONTH) + 1;
-        currentDay = calendar.get(Calendar.DAY_OF_MONTH);
-        week = calendar.get(Calendar.WEEK_OF_YEAR);
-        year = calendar.get(Calendar.YEAR);
-    }
-
-    /**
-     * Method: setCalendarInstanceToNewDate
-     * Sets the year, month, and day of the application's calendar instance from which the
-     * calendar user interface is made up.
-     */
-    private void setCalendarInstanceToNewDate(int year, int month, int day)
-    {
-        calendar.set(year, month - 1, day);
+        Calendar localDeviceCalendar = Calendar.getInstance(Locale.getDefault());
+        month = localDeviceCalendar.get(Calendar.MONTH) + 1;
+        currentDay = localDeviceCalendar.get(Calendar.DAY_OF_MONTH);
+        week = localDeviceCalendar.get(Calendar.WEEK_OF_YEAR);
+        year = localDeviceCalendar.get(Calendar.YEAR);
+        currentDate = getMonthName(month) + " " + currentDay + ", " + year;
     }
 
     /**
@@ -172,16 +157,18 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         oldDay = currentDay;
         Calendar localDeviceCalendar = Calendar.getInstance(Locale.getDefault());
         currentDay = localDeviceCalendar.get(Calendar.DAY_OF_MONTH);
+        currentDate = getMonthName(localDeviceCalendar.get(Calendar.MONTH)+ 1) + " " + currentDay
+                + ", " + localDeviceCalendar.get(Calendar.YEAR);
     }
 
     /**
      * Method: markSelectedDate
      * Highlights the selected date.
-     * @param dateInfoHolder the source of the selected date info to highlight
+     * @param date the selected date to highlight
      */
-    private void markSelectedDate(DateInfoHolder dateInfoHolder)
+    private void markSelectedDate(String date)
     {
-        adapter.setSelectedDate(dateInfoHolder.getDate());
+        adapter.setSelectedDate(date);
         adapter.notifyDataSetChanged();
     }
 
@@ -192,7 +179,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
      * the current month, adding each day of the current month, adding the first days of the next
      * month that trail out of the last week of the current month, assigning each date a text color,
      * and adding each date to the calendar grid adapter that actually displays the calendar.
-     * @param currentDayOfMonth the current day of the month
      * @param currentMonthNum the current or specified month
      * @param currentYear the current of specified year
      */
@@ -280,7 +266,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
                     String.valueOf(yearOfNextMonth), NEXT_AND_PREV_MONTH_DATE_COLOR));
         }
     }*/
-    private void fillCalendarWeek(int currentDayOfMonth, int currentMonthNum, int currentYear)
+    private void fillCalendarWeek(int currentMonthNum, int currentYear)
     {
         int daysInPrevMonth;
         int prevMonth;
@@ -288,6 +274,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         int nextMonth;
         int yearOfNextMonth;
         int daysInCurrentMonth = getMonthTotalDays(currentMonthNum);
+
         int currentWeek;
         int currentWeekMonth;
         int currentJulianDay;
@@ -295,12 +282,8 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         int endOfWeekDay = 1;
         int startOfWeekDay = 31;
 
-        final String TODAY_DATE_COLOR = "white";
-        final String CURRENT_MONTH_DATE_COLOR = "black";
-        final String NEXT_AND_PREV_MONTH_DATE_COLOR = "lightgrey";
-
         Calendar cal = Calendar.getInstance();
-        cal.set(currentYear, currentMonthNum -1, currentDayOfMonth);
+        cal.set(currentYear, currentMonthNum -1, currentDay);
         currentWeek = cal.get(Calendar.WEEK_OF_YEAR);
         currentWeekMonth = cal.get(Calendar.WEEK_OF_MONTH);
         currentJulianDay = cal.get(Calendar.DAY_OF_YEAR);
@@ -309,13 +292,17 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         for (int i = 1; i <= 31; i++)
         {
             cal.set(currentYear, currentMonthNum - 1, i);
-            if (currentWeek == cal.get(Calendar.WEEK_OF_YEAR)) {
+            if (currentWeek == cal.get(Calendar.WEEK_OF_YEAR))
+            {
                 dayNum = cal.get(Calendar.DAY_OF_MONTH);
 
-                if (dayNum > endOfWeekDay) {
+                if (dayNum > endOfWeekDay)
+                {
                     endOfWeekDay = dayNum;
                 }
-                if (dayNum < startOfWeekDay) {
+
+                if (dayNum < startOfWeekDay)
+                {
                     startOfWeekDay = dayNum;
                 }
             }
@@ -394,7 +381,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
     /**
      * Method: onCreateOptionsMenu
-     * Creates a settings menu in the action bar. TODO: functional settings menu not implemented yet
+     * Creates a settings menu in the action bar.
      * @param menu the settings menu
      * @return true the menu was created
      */
@@ -415,6 +402,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
+        //TODO: handle settings menu selections here
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -429,7 +417,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     /**
      * Method: onNavigationItemSelected
      * Toggles between 'Month', 'Week', and 'Day' calendar layouts and opens a new calendar screen
-     * based on the layout chosen. TODO: functional navigation menu not implemented yet
+     * based on the layout chosen.
      * @param itemPosition the position in the list of the item selected
      * @param itemId the id of the item selected
      * @return true the action was handled
@@ -437,6 +425,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     @Override
     public boolean onNavigationItemSelected(int itemPosition, long itemId)
     {
+        //TODO: handle calendar view drop down menu selections here
         Intent thisActivity = getIntent();
 
         if (thisActivity.hasExtra("prevActivityPosition") &&
@@ -476,7 +465,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 
         DateInfoHolder dateInfoHolder = adapter.getItem(info.position);
-        markSelectedDate(dateInfoHolder);
+        markSelectedDate(dateInfoHolder.getDate());
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.selected_date_options_menu, menu);
@@ -538,27 +527,25 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         if (currentDay != oldDay)
         {
             adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
-            fillCalendarWeek(currentDay, month, year);
+            fillCalendarWeek(month, year);
             adapter.notifyDataSetChanged();
             calendarGridWeek.setAdapter(adapter);
         }
     }
 
     /**
-     * Method: setCalendarMonthYear
+     * Method: displayMonthYear
      * Sets the current calendar's month and year and updates the CalendarGridAdapter to the new month
      * and year to display the proper dates in each cell of the calendar.
      * @param month the new month
      * @param year the new year
      */
-    private void setCalendarMonthYear(int month, int year)
+    private void displayMonthYear(int month, int year)
     {
         updateCurrentDay();
         adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
-        setCalendarInstanceToNewDate(year, month, currentDay);
-        //calendar.set(year, month - 1, currentDay);
-        formatCalendarTitleW();
-        fillCalendarWeek(currentDay, month, year);
+        setCalendarTitle();
+        fillCalendarWeek(month, year);
         adapter.notifyDataSetChanged();
         calendarGridWeek.setAdapter(adapter);
     }
@@ -586,13 +573,12 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     }
 
     /**
-     * Method: formatCalendarTitleW - Weekly
+     * Method: setCalendarTitle - Weekly
      * Formats and sets the calendar title.
      */
-    private void formatCalendarTitleW()
+    private void setCalendarTitle()
     {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(CALENDAR_TITLE_DATE_FORMAT, Locale.getDefault());
-        currentMonthTitle.setText(dateFormatter.format(calendar.getTime()));
+        currentMonthTitle.setText(getMonthName(month) + " " + year);
     }
 
     /**
@@ -618,7 +604,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
                 month--;
             }
 
-            setCalendarMonthYear(month, year);
+            displayMonthYear(month, year);
         }
 
         if (view == nextWeekButton)
@@ -634,7 +620,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
                 month++;
             }
 
-            setCalendarMonthYear(month, year);
+            displayMonthYear(month, year);
         }
     }
 
