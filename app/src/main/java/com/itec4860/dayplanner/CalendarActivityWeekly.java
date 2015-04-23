@@ -274,6 +274,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         int nextMonth;
         int yearOfNextMonth;
         int daysInCurrentMonth = getMonthTotalDays(currentMonthNum);
+
         int currentWeek;
         int currentWeekMonth;
         int currentJulianDay;
