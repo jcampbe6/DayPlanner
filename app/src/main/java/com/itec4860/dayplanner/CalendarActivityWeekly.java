@@ -54,7 +54,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
-    private final int[] DAYS_OF_THE_MONTHS = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     // variables for saving and retrieving instance state data
     private static final String STATE_MONTH = "month";
@@ -76,7 +75,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
                 R.array.toggle_calendar_options_list, R.layout.action_bar_dropdown_item);
         actionBar.setListNavigationCallbacks(spinnerAdapter, this);
 
-        // sets spinner selection to 'Month'
+        // sets spinner selection to 'Week'
         actionBar.setSelectedNavigationItem(1);
 
         prevWeekButton = (ImageButton) this.findViewById(R.id.prevWeek);
@@ -115,7 +114,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
             adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
         }
 
-        fillCalendarWeek(month, year);
+        fillCalendarWeek();
         adapter.notifyDataSetChanged();
         calendarGridWeek.setAdapter(adapter);
 
@@ -127,6 +126,17 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
                 DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
                 markSelectedDate(dateInfoHolder.getDate());
 
+                for (int i = 0; i < MONTHS.length; i++)
+                {
+                    if (dateInfoHolder.getMonth().equalsIgnoreCase(MONTHS[i]))
+                    {
+                        month = i + 1;
+                    }
+                }
+
+                year = Integer.parseInt(dateInfoHolder.getYear());
+                setCalendarTitle();
+
                 // TODO: for testing
                 Toast.makeText(getApplicationContext(), dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
             }
@@ -135,7 +145,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
     /**
      * Method: setCalendarToCurrentDate
-     * Sets the month, day, and year for the current month.
+     * Sets the month, week, day, and year for the current month based on the device's internal calendar.
      */
     private void setCalendarToCurrentDate()
     {
@@ -173,209 +183,33 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     }
 
     /**
-     * Method: fillCalendar
+     * Method: fillCalendarWeek
      * Fills the calendar grid with cells representing each day in a month in a given year by
      * adding the dates of the last days of the previous month leading into the first week of
      * the current month, adding each day of the current month, adding the first days of the next
      * month that trail out of the last week of the current month, assigning each date a text color,
      * and adding each date to the calendar grid adapter that actually displays the calendar.
-     * @param currentMonthNum the current or specified month
-     * @param currentYear the current of specified year
      */
-/*    private void fillCalendar(int currentDayOfMonth, int currentMonthNum, int currentYear)
+    private void fillCalendarWeek()
     {
-        int daysInPrevMonth;
-        int prevMonth;
-        int yearOfPrevMonth;
-        int nextMonth;
-        int yearOfNextMonth;
-        int daysInCurrentMonth = getMonthTotalDays(currentMonthNum);
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.set(Calendar.YEAR, year);
+        gregorianCalendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY); // sets pointer to 1st day of week
+        gregorianCalendar.set(Calendar.WEEK_OF_YEAR, week);
 
-        final String TODAY_DATE_COLOR = "white";
-        final String CURRENT_MONTH_DATE_COLOR = "black";
-        final String NEXT_AND_PREV_MONTH_DATE_COLOR = "lightgrey";
+        final int NUM_OF_DAYS_IN_A_WEEK = 7;
 
-        // adjusted currentMonthNum by -1 for GregorianCalendar compatibility
-        GregorianCalendar gregorianCalendar = new GregorianCalendar(currentYear, currentMonthNum - 1, 1);
-
-        if (currentMonthNum == 12)
+        for (int i = 1; i <= NUM_OF_DAYS_IN_A_WEEK; i++)
         {
-            prevMonth = currentMonthNum - 1;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-            nextMonth = 1;
-            yearOfPrevMonth = currentYear;
-            yearOfNextMonth = currentYear + 1;
-        }
+            int tempMonth = gregorianCalendar.get(Calendar.MONTH) + 1;
+            int tempDay = gregorianCalendar.get(Calendar.DAY_OF_MONTH);
+            int tempYear = gregorianCalendar.get(Calendar.YEAR);
 
-        else if (currentMonthNum == 1)
-        {
-            prevMonth = 12;
-            yearOfPrevMonth = currentYear - 1;
-            yearOfNextMonth = currentYear;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-            nextMonth = 2;
-        }
+                adapter.addItem(new DateInfoHolder(getMonthName(tempMonth), String.valueOf(tempDay),
+                        String.valueOf(tempYear), getApplicationContext().getResources()
+                        .getColor(R.color.currentMonthDateColor)));
 
-        else
-        {
-            prevMonth = currentMonthNum - 1;
-            nextMonth = currentMonthNum + 1;
-            yearOfNextMonth = currentYear;
-            yearOfPrevMonth = currentYear;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-        }
-
-        if (gregorianCalendar.isLeapYear(currentYear) && currentMonthNum == 2)
-        {
-            daysInCurrentMonth++;
-        }
-
-        int numOfLeadingDays = gregorianCalendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-        //calculate the 'day of the month' for each day of the previous month that leads into the
-        //first week of the current month and add info for those days to the cell info list
-        for (int i = 1; i <= numOfLeadingDays; i++)
-        {
-            int leadingDayOfMonth = daysInPrevMonth - numOfLeadingDays + i;
-
-            adapter.addItem(new DateInfoHolder(getMonthName(prevMonth), String.valueOf(leadingDayOfMonth),
-                    String.valueOf(yearOfPrevMonth), NEXT_AND_PREV_MONTH_DATE_COLOR));
-        }
-
-        //add info for each day of the current month to the cell info list
-        for (int i = 1; i <= daysInCurrentMonth; i++)
-        {
-            if (i == currentDayOfMonth)
-            {
-                adapter.addItem(new DateInfoHolder(getMonthName(currentMonthNum), String.valueOf(i),
-                        String.valueOf(currentYear), TODAY_DATE_COLOR));
-            }
-
-            else
-            {
-                adapter.addItem(new DateInfoHolder(getMonthName(currentMonthNum), String.valueOf(i),
-                        String.valueOf(currentYear), CURRENT_MONTH_DATE_COLOR));
-            }
-        }
-
-        //add info for each day of the next month that trails out of the last week of the current
-        //month to the cell info list
-        for (int i = 0; i < adapter.getCount() % 7; i++)
-        {
-            adapter.addItem(new DateInfoHolder(getMonthName(nextMonth), String.valueOf(i + 1),
-                    String.valueOf(yearOfNextMonth), NEXT_AND_PREV_MONTH_DATE_COLOR));
-        }
-    }*/
-    private void fillCalendarWeek(int currentMonthNum, int currentYear)
-    {
-        int daysInPrevMonth;
-        int prevMonth;
-        int yearOfPrevMonth;
-        int nextMonth;
-        int yearOfNextMonth;
-        int daysInCurrentMonth = getMonthTotalDays(currentMonthNum);
-
-        int currentWeek;
-        int currentWeekMonth;
-        int currentJulianDay;
-        int dayNum;
-        int endOfWeekDay = 1;
-        int startOfWeekDay = 31;
-
-        Calendar cal = Calendar.getInstance();
-        cal.set(currentYear, currentMonthNum -1, currentDay);
-        currentWeek = cal.get(Calendar.WEEK_OF_YEAR);
-        currentWeekMonth = cal.get(Calendar.WEEK_OF_MONTH);
-        currentJulianDay = cal.get(Calendar.DAY_OF_YEAR);
-
-        // find start and end week days for the month
-        for (int i = 1; i <= 31; i++)
-        {
-            cal.set(currentYear, currentMonthNum - 1, i);
-            if (currentWeek == cal.get(Calendar.WEEK_OF_YEAR))
-            {
-                dayNum = cal.get(Calendar.DAY_OF_MONTH);
-
-                if (dayNum > endOfWeekDay)
-                {
-                    endOfWeekDay = dayNum;
-                }
-
-                if (dayNum < startOfWeekDay)
-                {
-                    startOfWeekDay = dayNum;
-                }
-            }
-        }
-
-        // adjusted currentMonthNum by -1 for GregorianCalendar compatibility
-        GregorianCalendar gregorianCalendar = new GregorianCalendar(currentYear, currentMonthNum - 1, 1);
-
-        if (currentMonthNum == 12)
-        {
-            prevMonth = currentMonthNum - 1;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-            nextMonth = 1;
-            yearOfPrevMonth = currentYear;
-            yearOfNextMonth = currentYear + 1;
-        }
-
-        else if (currentMonthNum == 1)
-        {
-            prevMonth = 12;
-            yearOfPrevMonth = currentYear - 1;
-            yearOfNextMonth = currentYear;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-            nextMonth = 2;
-        }
-
-        else
-        {
-            prevMonth = currentMonthNum - 1;
-            nextMonth = currentMonthNum + 1;
-            yearOfNextMonth = currentYear;
-            yearOfPrevMonth = currentYear;
-            daysInPrevMonth = getMonthTotalDays(prevMonth);
-        }
-
-        if (gregorianCalendar.isLeapYear(currentYear) && currentMonthNum == 2)
-        {
-            daysInCurrentMonth++;
-        }
-
-        int numOfLeadingDays = gregorianCalendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-        //calculate the 'day of the month' for each day of the previous month that leads into the
-        //first week of the current month and add info for those days to the cell info list
-        if (currentWeekMonth == 1 && (endOfWeekDay - startOfWeekDay) < 6) {
-            for (int i = 1; i <= numOfLeadingDays; i++) {
-                int leadingDayOfMonth = daysInPrevMonth - numOfLeadingDays + i;
-
-                adapter.addItem(new DateInfoHolder(getMonthName(prevMonth), String.valueOf(leadingDayOfMonth),
-                        String.valueOf(yearOfPrevMonth), getApplicationContext().getResources()
-                        .getColor(R.color.nextAndPrevMonthDateColor)));
-            }
-        }
-
-        //add info for each day of the current month to the cell info list
-        for (int i = 1; i <= daysInCurrentMonth; i++) {
-        if (i >= startOfWeekDay && i <= endOfWeekDay) {
-
-            adapter.addItem(new DateInfoHolder(getMonthName(currentMonthNum), String.valueOf(i),
-                    String.valueOf(currentYear), getApplicationContext().getResources()
-                    .getColor(R.color.currentMonthDateColor)));
-
-        }
-    }
-
-        //add info for each day of the next month that trails out of the last week of the current
-        //month to the cell info list
-        if (currentWeekMonth == 5 && (endOfWeekDay - startOfWeekDay) < 6) {
-            for (int i = 0; i < adapter.getCount() % 7; i++) {
-                adapter.addItem(new DateInfoHolder(getMonthName(nextMonth), String.valueOf(i + 1),
-                        String.valueOf(yearOfNextMonth), getApplicationContext().getResources()
-                        .getColor(R.color.nextAndPrevMonthDateColor)));
-            }
+            gregorianCalendar.add(Calendar.DATE, 1); // sets pointer to next day of week
         }
     }
 
@@ -405,10 +239,20 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         //TODO: handle settings menu selections here
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.shareCalendar)
         {
-            return true;
+            Toast.makeText(getApplicationContext(), "Share Calendar", Toast.LENGTH_SHORT).show();
+        }
+
+        if (id == R.id.displayNationalHolidays)
+        {
+            Toast.makeText(getApplicationContext(), "Display National Holidays", Toast.LENGTH_SHORT).show();
+        }
+
+        if (id == R.id.goToCurrentDate)
+        {
+            setCalendarToCurrentDate();
+            updateCalendarUI();
         }
 
         return super.onOptionsItemSelected(item);
@@ -481,6 +325,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     @Override
     public boolean onContextItemSelected(MenuItem item)
     {
+        // TODO: handle add event here
         return true;
     }
 
@@ -527,25 +372,22 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         if (currentDay != oldDay)
         {
             adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
-            fillCalendarWeek(month, year);
+            fillCalendarWeek();
             adapter.notifyDataSetChanged();
             calendarGridWeek.setAdapter(adapter);
         }
     }
 
     /**
-     * Method: displayMonthYear
-     * Sets the current calendar's month and year and updates the CalendarGridAdapter to the new month
-     * and year to display the proper dates in each cell of the calendar.
-     * @param month the new month
-     * @param year the new year
+     * Method: updateCalendarUI
+     * Updates the calendar user interface to reflect any changes in the month, week, or year.
      */
-    private void displayMonthYear(int month, int year)
+    private void updateCalendarUI()
     {
         updateCurrentDay();
         adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
         setCalendarTitle();
-        fillCalendarWeek(month, year);
+        fillCalendarWeek();
         adapter.notifyDataSetChanged();
         calendarGridWeek.setAdapter(adapter);
     }
@@ -562,17 +404,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     }
 
     /**
-     * Method: getMonthTotalDays
-     * Returns the total number of days in a month specified by the month number.
-     * @param monthNumber the number of the desired month
-     * @return the number of days
-     */
-    private int getMonthTotalDays(int monthNumber)
-    {
-        return DAYS_OF_THE_MONTHS[monthNumber - 1];
-    }
-
-    /**
      * Method: setCalendarTitle - Weekly
      * Formats and sets the calendar title.
      */
@@ -583,8 +414,8 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
     /**
      * Method: onClick
-     * Responds to the 'next month' and 'previous month' buttons by setting the calendar month
-     * and year to the corresponding previous or next month and year depending on which button was
+     * Responds to the 'next week' and 'previous week' buttons by setting the calendar month, week
+     * and year to the corresponding previous or next month, week or year depending on which button was
      * clicked.
      * @param view the button view that was clicked
      */
@@ -593,41 +424,55 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     {
         if (view == prevWeekButton)
         {
-            if (month == 1)
+            if (week == 1)
             {
-                month = 12;
-                year--;
+                week = 52;
+
+                if (month != 12)
+                {
+                    year--;
+                }
             }
 
             else
             {
-                month--;
+                week--;
             }
-
-            displayMonthYear(month, year);
         }
 
         if (view == nextWeekButton)
         {
-            if (month == 12)
+            if (week == 52)
             {
-                month = 1;
+                week = 1;
+                year++;
+            }
+
+            else if (week == 1 && month == 12)
+            {
+                week++;
                 year++;
             }
 
             else
             {
-                month++;
+                week++;
             }
-
-            displayMonthYear(month, year);
         }
+
+        GregorianCalendar gCal = new GregorianCalendar();
+        gCal.set(Calendar.YEAR, year);
+        gCal.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY); // sets pointer to last day of week
+        gCal.set(Calendar.WEEK_OF_YEAR, week);
+        month = gCal.get(Calendar.MONTH) + 1;
+
+        updateCalendarUI();
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
-        getSupportActionBar().setSelectedNavigationItem(1);
+        getSupportActionBar().setSelectedNavigationItem(1); // set spinner to 'Week'
     }
 }
