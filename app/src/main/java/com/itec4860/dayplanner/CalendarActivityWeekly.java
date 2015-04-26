@@ -54,7 +54,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
-    private final int[] DAYS_OF_THE_MONTHS = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     // variables for saving and retrieving instance state data
     private static final String STATE_MONTH = "month";
@@ -146,7 +145,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
     /**
      * Method: setCalendarToCurrentDate
-     * Sets the month, day, and year for the current month.
+     * Sets the month, week, day, and year for the current month based on the device's internal calendar.
      */
     private void setCalendarToCurrentDate()
     {
@@ -242,7 +241,18 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
         if (id == R.id.shareCalendar)
         {
-            return true;
+            Toast.makeText(getApplicationContext(), "Share Calendar", Toast.LENGTH_SHORT).show();
+        }
+
+        if (id == R.id.displayNationalHolidays)
+        {
+            Toast.makeText(getApplicationContext(), "Display National Holidays", Toast.LENGTH_SHORT).show();
+        }
+
+        if (id == R.id.goToCurrentDate)
+        {
+            setCalendarToCurrentDate();
+            updateCalendarUI();
         }
 
         return super.onOptionsItemSelected(item);
@@ -370,8 +380,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
     /**
      * Method: updateCalendarUI
-     * Sets the current calendar's month and year and updates the CalendarGridAdapter to the new month
-     * and year to display the proper dates in each cell of the calendar.
+     * Updates the calendar user interface to reflect any changes in the month, week, or year.
      */
     private void updateCalendarUI()
     {
@@ -395,17 +404,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     }
 
     /**
-     * Method: getMonthTotalDays
-     * Returns the total number of days in a month specified by the month number.
-     * @param monthNumber the number of the desired month
-     * @return the number of days
-     */
-    private int getMonthTotalDays(int monthNumber)
-    {
-        return DAYS_OF_THE_MONTHS[monthNumber - 1];
-    }
-
-    /**
      * Method: setCalendarTitle - Weekly
      * Formats and sets the calendar title.
      */
@@ -416,8 +414,8 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
     /**
      * Method: onClick
-     * Responds to the 'next month' and 'previous month' buttons by setting the calendar month
-     * and year to the corresponding previous or next month and year depending on which button was
+     * Responds to the 'next week' and 'previous week' buttons by setting the calendar month, week
+     * and year to the corresponding previous or next month, week or year depending on which button was
      * clicked.
      * @param view the button view that was clicked
      */
@@ -464,7 +462,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
 
         GregorianCalendar gCal = new GregorianCalendar();
         gCal.set(Calendar.YEAR, year);
-        gCal.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+        gCal.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY); // sets pointer to last day of week
         gCal.set(Calendar.WEEK_OF_YEAR, week);
         month = gCal.get(Calendar.MONTH) + 1;
 
@@ -475,6 +473,6 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     protected void onResume()
     {
         super.onResume();
-        getSupportActionBar().setSelectedNavigationItem(1);
+        getSupportActionBar().setSelectedNavigationItem(1); // set spinner to 'Week'
     }
 }
