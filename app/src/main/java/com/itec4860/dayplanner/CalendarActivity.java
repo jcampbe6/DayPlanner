@@ -130,7 +130,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
     /**
      * Method: setCalendarToCurrentDate
-     * Sets the month, day, and year for the current month.
+     * Sets the month, day, and year for the current month based on the device's internal calendar.
      */
     private void setCalendarToCurrentDate()
     {
@@ -174,7 +174,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
      * month that trail out of the last week of the current month, assigning each date a text color,
      * and adding each date to the calendar grid adapter that actually displays the calendar.
      */
-    private void fillCalendar()//(int currentMonthNum, int currentYear)
+    private void fillCalendar()
     {
         int daysInPrevMonth;
         int prevMonth;
@@ -416,8 +416,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
     /**
      * Method: updateCalendarUI
-     * Sets the current calendar's month and year and updates the CalendarGridAdapter to the new month
-     * and year to display the proper dates in each cell of the calendar.
+     * Updates the calendar user interface to reflect any changes in the month or year.
      */
     private void updateCalendarUI()
     {
@@ -507,6 +506,6 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     protected void onResume()
     {
         super.onResume();
-        getSupportActionBar().setSelectedNavigationItem(0);
+        getSupportActionBar().setSelectedNavigationItem(0); // set spinner to 'Month'
     }
 }
