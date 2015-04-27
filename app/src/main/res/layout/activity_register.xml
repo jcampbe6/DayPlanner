@@ -38,7 +38,7 @@
             android:id="@+id/regErrorMsgTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#e30000"
+            android:textColor="@color/red_warning"
             android:padding="5dp"
             android:textStyle="bold"
             android:layout_gravity="center"

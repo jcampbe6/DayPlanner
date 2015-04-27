@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -78,8 +77,8 @@ public class EventViewActivity extends Activity
         }
 
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
-                R.array.eventTypeSpinnerOptions, android.R.layout.simple_spinner_item);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.eventTypeSpinnerOptions, R.layout.event_type_spinner_item);
+        spinnerAdapter.setDropDownViewResource(R.layout.event_type_spinner_dropdown_item);
         eventTypeSpinner.setAdapter(spinnerAdapter);
 
         eventTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -106,6 +105,10 @@ public class EventViewActivity extends Activity
         });
     }
 
+    /**
+     * Inner Class: DatePickerFragment
+     * Represents the date picker dialog box to set project start date or due date.
+     */
     public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener
     {
 
@@ -133,6 +136,11 @@ public class EventViewActivity extends Activity
         }
     }
 
+    /**
+     * Method:  showDatePickerDialog
+     * Displays the date picker dialog when the start date or end date buttons are clicked.
+     * @param view the button that was clicked
+     */
     public void showDatePickerDialog(View view)
     {
         if (view == findViewById(R.id.startDateSelector))
@@ -150,11 +158,21 @@ public class EventViewActivity extends Activity
         }
     }
 
+    /**
+     * Method: addNewTask
+     * Adds a new task for the current project when the new task button is clicked.
+     * @param view the new task button
+     */
     public void addNewTask(View view)
     {
         Toast.makeText(getApplicationContext(), "Add Task Coming Soon", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Method: saveEvent
+     * Saves the project data to the database when the save button is clicked.
+     * @param view the save button
+     */
     public void saveEvent(View view)
     {
         Toast.makeText(getApplicationContext(), "Save Event Coming Soon", Toast.LENGTH_SHORT).show();
