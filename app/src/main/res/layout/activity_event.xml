@@ -14,4 +14,42 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/eventTitle"
+        android:layout_below="@+id/eventTypeSpinner"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="DefaultEventName"
+        android:maxLines="1"
+        android:maxLength="30"
+        android:textSize="20dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/saveButton"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/notesText"
+        android:layout_above="@+id/saveButton"
+        android:layout_centerHorizontal="true"
+        android:text="Notes: " />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add User"
+        android:id="@+id/addUserButton"
+        android:layout_above="@+id/notesText"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
