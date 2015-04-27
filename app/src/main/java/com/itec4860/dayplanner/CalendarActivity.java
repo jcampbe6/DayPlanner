@@ -50,6 +50,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private int month;
     private int year;
     private String currentDate;
+    private String selectedDate;
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
@@ -58,7 +59,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     // variables for saving and retrieving instance state data
     private static final String STATE_MONTH = "month";
     private static final String STATE_YEAR = "year";
-    private static final String STATE_SELECTED_DAY = "selected_day";
+    private static final String STATE_SELECTED_DATE = "selected_date";
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
     @Override
@@ -99,10 +100,11 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         calendarGrid = (GridView) this.findViewById(R.id.calendarGrid);
         registerForContextMenu(calendarGrid);
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DAY))
+        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DATE))
         {
+            selectedDate = savedInstanceState.getString(STATE_SELECTED_DATE);
             adapter = new CalendarGridAdapter(getApplicationContext(), currentDate,
-                    savedInstanceState.getString(STATE_SELECTED_DAY));
+                    selectedDate);
         }
 
         else
@@ -138,7 +140,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         month = localDeviceCalendar.get(Calendar.MONTH) + 1;
         currentDay = localDeviceCalendar.get(Calendar.DAY_OF_MONTH);
         year = localDeviceCalendar.get(Calendar.YEAR);
-        currentDate = getMonthName(month) + " " + currentDay + ", " + year;
+        currentDate = month + "/" + currentDay + "/" + year;
     }
 
     /**
@@ -151,8 +153,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         oldDay = currentDay;
         Calendar localDeviceCalendar = Calendar.getInstance(Locale.getDefault());
         currentDay = localDeviceCalendar.get(Calendar.DAY_OF_MONTH);
-        currentDate = getMonthName(localDeviceCalendar.get(Calendar.MONTH)+ 1) + " " + currentDay
-            + ", " + localDeviceCalendar.get(Calendar.YEAR);
+        currentDate = (localDeviceCalendar.get(Calendar.MONTH)+ 1) + "/" + currentDay
+                + "/" + localDeviceCalendar.get(Calendar.YEAR);
     }
 
     /**
@@ -162,6 +164,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
      */
     private void markSelectedDate(String date)
     {
+        selectedDate = date;
         adapter.setSelectedDate(date);
         adapter.notifyDataSetChanged();
     }
@@ -226,7 +229,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         {
             int leadingDayOfMonth = daysInPrevMonth - numOfLeadingDays + i;
 
-            adapter.addItem(new DateInfoHolder(getMonthName(prevMonth), String.valueOf(leadingDayOfMonth),
+            adapter.addItem(new DateInfoHolder(String.valueOf(prevMonth), String.valueOf(leadingDayOfMonth),
                     String.valueOf(yearOfPrevMonth), getApplicationContext().getResources()
                     .getColor(R.color.nextAndPrevMonthDateColor)));
         }
@@ -234,7 +237,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         //add info for each day of the current month to the cell info list
         for (int i = 1; i <= daysInCurrentMonth; i++)
         {
-            adapter.addItem(new DateInfoHolder(getMonthName(month), String.valueOf(i),
+            adapter.addItem(new DateInfoHolder(String.valueOf(month), String.valueOf(i),
                     String.valueOf(year), getApplicationContext().getResources()
                     .getColor(R.color.currentMonthDateColor)));
         }
@@ -243,7 +246,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         //month to the cell info list
         for (int i = 0; i < adapter.getCount() % 7; i++)
         {
-            adapter.addItem(new DateInfoHolder(getMonthName(nextMonth), String.valueOf(i + 1),
+            adapter.addItem(new DateInfoHolder(String.valueOf(nextMonth), String.valueOf(i + 1),
                     String.valueOf(yearOfNextMonth), getApplicationContext().getResources()
                     .getColor(R.color.nextAndPrevMonthDateColor)));
         }
@@ -348,6 +351,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         DateInfoHolder dateInfoHolder = adapter.getItem(info.position);
         markSelectedDate(dateInfoHolder.getDate());
 
+        menu.setHeaderTitle(dateInfoHolder.getDate());
+
         MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.selected_date_options_menu, menu);
     }
@@ -363,6 +368,15 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     public boolean onContextItemSelected(MenuItem item)
     {
         // TODO: handle 'add event' here
+        int id = item.getItemId();
+
+        if (id == R.id.addEvent)
+        {
+            Intent addEventIntent = new Intent(getApplicationContext(), EventViewActivity.class);
+            addEventIntent.putExtra("date", selectedDate);
+            startActivity(addEventIntent);
+        }
+
         return true;
     }
 
@@ -377,7 +391,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         instanceState.putInt(STATE_SELECTED_NAVIGATION_ITEM, getSupportActionBar().getSelectedNavigationIndex());
         instanceState.putInt(STATE_MONTH, month);
         instanceState.putInt(STATE_YEAR, year);
-        instanceState.putString(STATE_SELECTED_DAY, adapter.getSelectedDate());
+        instanceState.putString(STATE_SELECTED_DATE, adapter.getSelectedDate());
     }
 
     /**

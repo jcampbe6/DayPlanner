@@ -47,7 +47,7 @@
             android:paddingRight="10dp"
             android:paddingEnd="10dp"
             android:background="@drawable/date_selector_btn_background"
-            android:onClick="showDateSelectorDialog">
+            android:onClick="showDatePickerDialog">
 
             <TextView
                 android:id="@+id/startDateTitle"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:text="Pick a date"
+                android:text="Select date"
                 android:textColor="#000000"/>
 
         </RelativeLayout>
@@ -81,7 +81,7 @@
             android:paddingRight="10dp"
             android:paddingEnd="10dp"
             android:background="@drawable/date_selector_btn_background"
-            android:onClick="showDateSelectorDialog">
+            android:onClick="showDatePickerDialog">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:text="Pick a date"
+                android:text="Select date"
                 android:textColor="#000000"/>
 
         </RelativeLayout>
