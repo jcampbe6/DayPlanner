@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -22,16 +23,51 @@ public class EventActivity extends ActionBarActivity {
 
     private Spinner eventTypeSpinner;
     private Button saveButton;
+    private Button addUserButton;
+    private EditText addedUserField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event);
 
+        addUserButton = (Button) findViewById(R.id.addUserButton);
+//        addedUserField = (EditText) findViewById(R.id.addedUserField);
+
         addItemsOnSpinner();
         addListenerOnButton();
         addListenerOnSpinnerItemSelection();
+
+//        When pressed the addUser button creates an new editable text field representing a user.
+//        This is infinitely repeatable.
+                addUserButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                //when addUser is clicked show the new textField
+                EditText newUserTextField = new EditText(v.getContext());  // create TextField
+                newUserTextField.setText("");      //  Set the default text of the Field
+                // set params and add button to layout
+
+            }
+        });
+
+        //the save button saves the data inputted
+        // currently just prints text instead.
+        saveButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                Toast.makeText(EventActivity.this,
+                        "OnClickListener : " + "\nEvent Type: " +
+                                String.valueOf(eventTypeSpinner.getSelectedItem()),
+                        Toast.LENGTH_SHORT).show();
+            }
+
+        });
     }
+
 
 
     @Override
@@ -77,23 +113,11 @@ public class EventActivity extends ActionBarActivity {
         eventTypeSpinner.setOnItemSelectedListener(new CustomProjectTypeListener());
     }
 
+
     // get the selected dropdown list value
     public void addListenerOnButton() {
 
         eventTypeSpinner = (Spinner) findViewById(R.id.eventTypeSpinner);
-
-//the save button doesn't do anything important right now
-        saveButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                Toast.makeText(EventActivity.this,
-                        "OnClickListener : " + "\nEvent Type: " +
-                                String.valueOf(eventTypeSpinner.getSelectedItem()),
-                        Toast.LENGTH_SHORT).show();
-            }
-
-        });
     }
+
 }
