@@ -73,7 +73,7 @@ public class DateInfoHolder
 
     public String getDate()
     {
-        return month + " " + day + ", " + year;
+        return month + "/" + day + "/" + year;
     }
 
     public int getDateTextColor()
