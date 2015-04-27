@@ -2,6 +2,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@drawable/registration_background_gradient"
                 tools:context="com.itec4860.dayplanner.EventViewActivity">
 
     <LinearLayout
@@ -18,23 +19,27 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <!-- Event Type Spinner Selector -->
             <Spinner
                 android:id="@+id/eventTypeSpinner"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.2"
+                android:layout_weight="1.3"
                 android:layout_marginRight="10dp"
                 android:layout_marginLeft="10dp"/>
 
+            <!-- Project Name -->
             <EditText
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
                 android:hint="Project Name"
+                android:textSize="18sp"
                 android:layout_marginRight="10dp"/>
 
         </LinearLayout>
 
+        <!-- Start Date -->
         <RelativeLayout
             android:id="@+id/startDateSelector"
             android:layout_width="match_parent"
@@ -57,6 +62,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
                 android:text="Start date:"
+                android:textSize="18sp"
                 android:textColor="#000000"/>
 
             <TextView
@@ -66,10 +72,12 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:text="Select date"
+                android:textSize="18sp"
                 android:textColor="#000000"/>
 
         </RelativeLayout>
 
+        <!-- End Date -->
         <RelativeLayout
             android:id="@+id/dueDateSelector"
             android:layout_width="match_parent"
@@ -89,6 +97,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
                 android:text="Due date:"
+                android:textSize="18sp"
                 android:textColor="#000000"/>
 
             <TextView
@@ -98,12 +107,14 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:text="Select date"
+                android:textSize="18sp"
                 android:textColor="#000000"/>
 
         </RelativeLayout>
 
     </LinearLayout>
 
+    <!-- Task List -->
     <ListView
         android:id="@+id/projectTasks"
         android:layout_width="match_parent"
@@ -117,6 +128,7 @@
 
     </ListView>
 
+    <!-- Button Bar -->
     <RelativeLayout
         android:id="@+id/projectButtonBar"
         android:layout_width="match_parent"
@@ -128,6 +140,7 @@
         android:paddingEnd="10dp"
         android:paddingBottom="10dp">
 
+        <!-- Add Task Button -->
         <Button
             android:id="@+id/newTaskButton"
             android:layout_width="wrap_content"
@@ -137,6 +150,7 @@
             android:text="New Task"
             android:onClick="addNewTask"/>
 
+        <!-- Save Event Button -->
         <Button
             android:id="@+id/saveProjectButton"
             android:layout_width="wrap_content"
