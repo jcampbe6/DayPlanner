@@ -52,4 +52,25 @@
         android:layout_above="@+id/notesText"
         android:layout_centerHorizontal="true" />
 
+    <DatePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/eventDate"
+        android:layout_below="@+id/eventTitle"
+        android:layout_centerHorizontal="true" />
+
+    <TimePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/endTime"
+        android:layout_above="@+id/addUserButton"
+        android:layout_centerHorizontal="true" />
+
+    <TimePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/startTime"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

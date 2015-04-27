@@ -50,4 +50,18 @@
         android:layout_above="@+id/addUserButton"
         android:layout_centerHorizontal="true" />
 
+    <DatePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/startDate"
+        android:layout_below="@+id/projectName"
+        android:layout_centerHorizontal="true" />
+
+    <DatePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/endDate"
+        android:layout_above="@+id/addTaskButton"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
