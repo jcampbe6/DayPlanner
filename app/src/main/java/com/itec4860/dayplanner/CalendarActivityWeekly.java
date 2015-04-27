@@ -51,6 +51,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     private int week;
     private int year;
     private String currentDate;
+    private String selectedDate;
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
@@ -59,7 +60,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     private static final String STATE_MONTH = "month";
     private static final String STATE_WEEK = "week";
     private static final String STATE_YEAR = "year";
-    private static final String STATE_SELECTED_DAY = "selected_day";
+    private static final String STATE_SELECTED_DATE = "selected_date";
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
 
@@ -103,10 +104,10 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         registerForContextMenu(calendarGridWeek);
 
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DAY))
+        if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DATE))
         {
-            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate,
-                    savedInstanceState.getString(STATE_SELECTED_DAY));
+            selectedDate = savedInstanceState.getString(STATE_SELECTED_DATE);
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate,selectedDate);
         }
 
         else
@@ -154,7 +155,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         currentDay = localDeviceCalendar.get(Calendar.DAY_OF_MONTH);
         week = localDeviceCalendar.get(Calendar.WEEK_OF_YEAR);
         year = localDeviceCalendar.get(Calendar.YEAR);
-        currentDate = getMonthName(month) + " " + currentDay + ", " + year;
+        currentDate = month + "/" + currentDay + "/" + year;
     }
 
     /**
@@ -167,8 +168,8 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         oldDay = currentDay;
         Calendar localDeviceCalendar = Calendar.getInstance(Locale.getDefault());
         currentDay = localDeviceCalendar.get(Calendar.DAY_OF_MONTH);
-        currentDate = getMonthName(localDeviceCalendar.get(Calendar.MONTH)+ 1) + " " + currentDay
-                + ", " + localDeviceCalendar.get(Calendar.YEAR);
+        currentDate = (localDeviceCalendar.get(Calendar.MONTH)+ 1) + "/" + currentDay
+                + "/" + localDeviceCalendar.get(Calendar.YEAR);
     }
 
     /**
@@ -178,6 +179,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
      */
     private void markSelectedDate(String date)
     {
+        selectedDate = date;
         adapter.setSelectedDate(date);
         adapter.notifyDataSetChanged();
     }
@@ -205,7 +207,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
             int tempDay = gregorianCalendar.get(Calendar.DAY_OF_MONTH);
             int tempYear = gregorianCalendar.get(Calendar.YEAR);
 
-                adapter.addItem(new DateInfoHolder(getMonthName(tempMonth), String.valueOf(tempDay),
+                adapter.addItem(new DateInfoHolder(String.valueOf(tempMonth), String.valueOf(tempDay),
                         String.valueOf(tempYear), getApplicationContext().getResources()
                         .getColor(R.color.currentMonthDateColor)));
 
@@ -311,6 +313,8 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         DateInfoHolder dateInfoHolder = adapter.getItem(info.position);
         markSelectedDate(dateInfoHolder.getDate());
 
+        menu.setHeaderTitle(dateInfoHolder.getDate());
+
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.selected_date_options_menu, menu);
     }
@@ -326,6 +330,15 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
     public boolean onContextItemSelected(MenuItem item)
     {
         // TODO: handle add event here
+        int id = item.getItemId();
+
+        if (id == R.id.addEvent)
+        {
+            Intent addEventIntent = new Intent(getApplicationContext(), EventViewActivity.class);
+            addEventIntent.putExtra("date", selectedDate);
+            startActivity(addEventIntent);
+        }
+
         return true;
     }
 
@@ -341,7 +354,7 @@ public class CalendarActivityWeekly extends ActionBarActivity implements ActionB
         instanceState.putInt(STATE_MONTH, month);
         instanceState.putInt(STATE_YEAR, year);
         instanceState.putInt(STATE_WEEK, week);
-        instanceState.putString(STATE_SELECTED_DAY, adapter.getSelectedDate());
+        instanceState.putString(STATE_SELECTED_DATE, adapter.getSelectedDate());
     }
 
     /**

@@ -103,8 +103,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DATE))
         {
             selectedDate = savedInstanceState.getString(STATE_SELECTED_DATE);
-            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate,
-                    selectedDate);
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate,selectedDate);
         }
 
         else
