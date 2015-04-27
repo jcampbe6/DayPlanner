@@ -56,7 +56,7 @@ public class EventActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+//WORKRKRKRKRK
 
     // add items into spinner dynamically
     public void addItemsOnSpinner() {
