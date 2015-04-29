@@ -37,7 +37,8 @@
         </activity>
         <activity
             android:name=".EventViewActivity"
-            android:label="@string/title_activity_event_view" >
+            android:label="@string/title_activity_event_view"
+            android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
     </application>
 
