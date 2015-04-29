@@ -1,165 +1,185 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/registration_background_gradient"
                 tools:context="com.itec4860.dayplanner.EventViewActivity">
 
-    <LinearLayout
-        android:id="@+id/projectMainInfo"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_alignParentTop="true">
+        android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/projectMainInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_alignParentTop="true">
 
-            <!-- Event Type Spinner Selector -->
-            <Spinner
-                android:id="@+id/eventTypeSpinner"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.3"
-                android:layout_marginRight="10dp"
-                android:layout_marginLeft="10dp"/>
+                android:orientation="horizontal">
 
-            <!-- Project Name -->
-            <EditText
-                android:layout_width="0dp"
+                <!-- Event Type Spinner Selector -->
+                <Spinner
+                    android:id="@+id/eventTypeSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1.3"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginLeft="10dp"/>
+
+                <!-- Project Name -->
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:hint="Project Name"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:layout_marginRight="10dp"/>
+
+            </LinearLayout>
+
+            <!-- Start Date -->
+            <RelativeLayout
+                android:id="@+id/startDateSelector"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:hint="Project Name"
-                android:textSize="18sp"
-                android:layout_marginRight="10dp"/>
+                android:layout_marginTop="10dp"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                android:paddingLeft="10dp"
+                android:paddingStart="10dp"
+                android:paddingRight="10dp"
+                android:paddingEnd="10dp"
+                android:background="@drawable/btn_background_orange"
+                android:onClick="showDatePickerDialog">
+
+                <TextView
+                    android:id="@+id/startDateTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:text="Start date"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="#000000"/>
+
+                <TextView
+                    android:id="@+id/startDateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:text="Select date"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="#000000"/>
+
+            </RelativeLayout>
+
+            <!-- Due Date -->
+            <RelativeLayout
+                android:id="@+id/dueDateSelector"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                android:paddingLeft="10dp"
+                android:paddingStart="10dp"
+                android:paddingRight="10dp"
+                android:paddingEnd="10dp"
+                android:background="@drawable/btn_background_orange"
+                android:onClick="showDatePickerDialog">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:text="Due date"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="#000000"/>
+
+                <TextView
+                    android:id="@+id/dueDateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:text="Select date"
+                    android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="#000000"/>
+
+            </RelativeLayout>
 
         </LinearLayout>
 
-        <!-- Start Date -->
+        <!-- Add task button -->
         <RelativeLayout
-            android:id="@+id/startDateSelector"
+            android:id="@+id/addTaskButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
+            android:layout_below="@+id/projectMainInfo"
+            android:background="@drawable/btn_background_orange"
+            android:padding="10dp"
+            android:onClick="addNewTask">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Task"
+                android:textAppearance="@android:style/TextAppearance.Medium"
+                android:textColor="@color/black"
+                android:layout_alignParentLeft="true"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/add_button_icon"/>
+
+        </RelativeLayout>
+
+        <!-- Task List Container -->
+        <LinearLayout
+            android:id="@+id/taskContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@+id/addTaskButton"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp">
+
+        </LinearLayout>
+
+        <!-- Button Bar -->
+        <RelativeLayout
+            android:id="@+id/projectButtonBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/taskContainer"
             android:paddingLeft="10dp"
             android:paddingStart="10dp"
             android:paddingRight="10dp"
             android:paddingEnd="10dp"
-            android:background="@drawable/date_selector_btn_background"
-            android:onClick="showDatePickerDialog">
+            android:paddingBottom="10dp">
 
-            <TextView
-                android:id="@+id/startDateTitle"
+            <!-- Save Event Button -->
+            <Button
+                android:id="@+id/saveProjectButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:text="Start date:"
-                android:textSize="18sp"
-                android:textColor="#000000"/>
-
-            <TextView
-                android:id="@+id/startDateText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:text="Select date"
-                android:textSize="18sp"
-                android:textColor="#000000"/>
+                android:layout_alignParentEnd="true"
+                android:text="Save"
+                android:onClick="saveEvent"/>
 
         </RelativeLayout>
-
-        <!-- End Date -->
-        <RelativeLayout
-            android:id="@+id/dueDateSelector"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:paddingLeft="10dp"
-            android:paddingStart="10dp"
-            android:paddingRight="10dp"
-            android:paddingEnd="10dp"
-            android:background="@drawable/date_selector_btn_background"
-            android:onClick="showDatePickerDialog">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:text="Due date:"
-                android:textSize="18sp"
-                android:textColor="#000000"/>
-
-            <TextView
-                android:id="@+id/dueDateText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:text="Select date"
-                android:textSize="18sp"
-                android:textColor="#000000"/>
-
-        </RelativeLayout>
-
-    </LinearLayout>
-
-    <!-- Task List -->
-    <ListView
-        android:id="@+id/projectTasks"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/projectMainInfo"
-        android:layout_above="@+id/projectButtonBar"
-        android:paddingLeft="10dp"
-        android:paddingStart="10dp"
-        android:paddingRight="10dp"
-        android:paddingEnd="10dp">
-
-    </ListView>
-
-    <!-- Button Bar -->
-    <RelativeLayout
-        android:id="@+id/projectButtonBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:paddingLeft="10dp"
-        android:paddingStart="10dp"
-        android:paddingRight="10dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="10dp">
-
-        <!-- Add Task Button -->
-        <Button
-            android:id="@+id/newTaskButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:text="New Task"
-            android:onClick="addNewTask"/>
-
-        <!-- Save Event Button -->
-        <Button
-            android:id="@+id/saveProjectButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:text="Save"
-            android:onClick="saveEvent"/>
 
     </RelativeLayout>
 
-</RelativeLayout>
+</ScrollView>
