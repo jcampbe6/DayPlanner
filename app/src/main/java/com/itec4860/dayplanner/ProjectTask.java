@@ -4,6 +4,12 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Class: ProjectTask
  * @author Joshua Campbell
@@ -17,29 +23,56 @@ import android.widget.TextView;
  */
 public class ProjectTask 
 {
-    private EditText taskName;
-    private TextView dueDate;
-    private CheckBox completedStatus;
+    private EditText taskNameEditText;
+    private TextView dueDateTextView;
+    private CheckBox completedStatusCheckBox;
+    private int taskDueMonth;
+    private int taskDueDay;
+    private int taskDueYear;
+
+    private DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 
     public ProjectTask(EditText taskName, TextView dueDate, CheckBox completedStatus)
     {
-        this.taskName = taskName;
-        this.dueDate = dueDate;
-        this.completedStatus = completedStatus;
+        taskNameEditText = taskName;
+        dueDateTextView = dueDate;
+        completedStatusCheckBox = completedStatus;
     }
 
     public String getTaskName()
     {
-        return taskName.getText().toString();
+        return taskNameEditText.getText().toString();
     }
 
     public String getDueDate()
     {
-        return dueDate.getText().toString();
+        return dueDateTextView.getText().toString();
     }
 
     public boolean isTaskCompleted()
     {
-        return completedStatus.isChecked();
+        return completedStatusCheckBox.isChecked();
+    }
+
+    public void setMonthDayYear(int month, int day, int year)
+    {
+        taskDueMonth = month;
+        taskDueDay = day;
+        taskDueYear = year;
+    }
+
+    public int getTaskDueMonth()
+    {
+        return taskDueMonth;
+    }
+
+    public int getTaskDueDay()
+    {
+        return taskDueDay;
+    }
+
+    public int getTaskDueYear()
+    {
+        return taskDueYear;
     }
 }

@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,8 +34,8 @@ public class EventViewActivity extends Activity
 {
     // user interface elements
     private Spinner eventTypeSpinner;
-    private static TextView startDateText;
-    private static TextView dueDateText;
+    private static TextView startDateTextView;
+    private static TextView dueDateTextView;
     private LinearLayout taskListContainer;
 
     // data for saving event
@@ -45,12 +46,15 @@ public class EventViewActivity extends Activity
     private boolean hasTask = false;  // todo: I might not need this
     private ArrayList<ProjectTask> taskList;
 
-    // variables for date picker
-    private static int month;
-    private static int day;
-    private static int year;
-    private static boolean isDueDateSelected = false;
-    private static boolean isStartDateSelected = false;
+    // variables for project date picker
+    private static int projStartMonth;
+    private static int projStartDay;
+    private static int projStartYear;
+    private static int projDueMonth;
+    private static int projDueDay;
+    private static int projDueYear;
+    private static final String START_DATE_SOURCE = "start date";
+    private static final String DUE_DATE_SOURCE = "due date";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -65,15 +69,15 @@ public class EventViewActivity extends Activity
 
         taskList = new ArrayList<>();
 
-        startDateText = (TextView) findViewById(R.id.startDateText);
-        dueDateText = (TextView) findViewById(R.id.dueDateText);
+        startDateTextView = (TextView) findViewById(R.id.startDateText);
+        dueDateTextView = (TextView) findViewById(R.id.dueDateText);
 
         taskListContainer = (LinearLayout) findViewById(R.id.taskContainer);
 
         if (getIntent().hasExtra("date"))
         {
             projectStartDate = getIntent().getStringExtra("date");
-            startDateText.setText(projectStartDate);
+            startDateTextView.setText(projectStartDate);
 
             DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
             try
@@ -81,9 +85,9 @@ public class EventViewActivity extends Activity
                 Date date = formatter.parse(projectStartDate);
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
-                month = calendar.get(Calendar.MONTH);
-                day = calendar.get(Calendar.DAY_OF_MONTH);
-                year = calendar.get(Calendar.YEAR);
+                projStartMonth = calendar.get(Calendar.MONTH) + 1;
+                projStartDay = calendar.get(Calendar.DAY_OF_MONTH);
+                projStartYear = calendar.get(Calendar.YEAR);
             }
             catch (ParseException e)
             {
@@ -126,28 +130,45 @@ public class EventViewActivity extends Activity
      */
     public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener
     {
+        private int tempMonth;
+        private int tempDay;
+        private int tempYear;
+        private String source;
+
+        public DatePickerFragment(int month, int day, int year, String source)
+        {
+            tempMonth = month;
+            tempDay = day;
+            tempYear = year;
+            this.source = source;
+        }
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState)
         {
             // Create a new instance of DatePickerDialog and return it
-            return new DatePickerDialog(getActivity(), this, year, month, day);
+            return new DatePickerDialog(getActivity(), this, tempYear, tempMonth, tempDay);
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day)
         {
             // Do something with the date chosen by the user
-            if (isDueDateSelected)
+            if (source.equalsIgnoreCase(START_DATE_SOURCE))
             {
-                projectDueDate = (month + 1) + "/" + day + "/" + year;
-                dueDateText.setText(projectDueDate);
-                isDueDateSelected = false;
+                projStartMonth = month + 1;
+                projStartDay = day;
+                projStartYear = year;
+                projectStartDate = projStartMonth + "/" + projStartDay + "/" + projStartYear;
+                startDateTextView.setText(projectStartDate);
             }
 
-            if (isStartDateSelected)
+            if (source.equalsIgnoreCase(DUE_DATE_SOURCE))
             {
-                projectStartDate = (month + 1) + "/" + day + "/" + year;
-                startDateText.setText(projectStartDate);
-                isStartDateSelected = false;
+                projDueMonth = month + 1;
+                projDueDay = day;
+                projDueYear = year;
+                projectDueDate = projDueMonth + "/" + projDueDay + "/" + projDueYear;
+                dueDateTextView.setText(projectDueDate);
             }
         }
     }
@@ -161,15 +182,26 @@ public class EventViewActivity extends Activity
     {
         if (view == findViewById(R.id.startDateSelector))
         {
-            isStartDateSelected = true;
-            DialogFragment newFragment = new DatePickerFragment();
+            DialogFragment newFragment = new DatePickerFragment(projStartMonth - 1, projStartDay,
+                    projStartYear, START_DATE_SOURCE);
             newFragment.show(getFragmentManager(), "datePicker");
         }
 
         if (view == findViewById(R.id.dueDateSelector))
         {
-            isDueDateSelected = true;
-            DialogFragment newFragment = new DatePickerFragment();
+            DialogFragment newFragment;
+
+            if (projectDueDate == null)
+            {
+                newFragment = new DatePickerFragment(projStartMonth - 1, projStartDay, projStartYear,
+                        DUE_DATE_SOURCE);
+            }
+            else
+            {
+                newFragment = new DatePickerFragment(projDueMonth - 1, projDueDay, projDueYear,
+                        DUE_DATE_SOURCE);
+            }
+
             newFragment.show(getFragmentManager(), "datePicker");
         }
     }
@@ -195,6 +227,7 @@ public class EventViewActivity extends Activity
 
         // adds task to task list array
         final ProjectTask newTask = new ProjectTask(taskNameEditText, taskDueDateTextView, taskCompletedStatusBox);
+        newTask.setMonthDayYear(projStartMonth, projStartDay, projStartYear);
         taskList.add(newTask);
 
         /**
@@ -206,13 +239,15 @@ public class EventViewActivity extends Activity
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState)
             {
-                return new DatePickerDialog(getActivity(), this, year, month, day);
+                return new DatePickerDialog(getActivity(), this, newTask.getTaskDueYear(),
+                        newTask.getTaskDueMonth() - 1, newTask.getTaskDueDay());
             }
 
             public void onDateSet(DatePicker view, int year, int month, int day)
             {
                 // Do something with the date chosen by the user
-                String taskDueDate = (month + 1) + "/" + day + "/" + year;
+                newTask.setMonthDayYear(month + 1, day, year);
+                String taskDueDate = month + 1 + "/" + day + "/" + year;
                 taskDueDateTextView.setText(taskDueDate);
             }
         }
