@@ -4,12 +4,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
 /**
  * Class: ProjectTask
  * @author Joshua Campbell
@@ -29,8 +23,6 @@ public class ProjectTask
     private int taskDueMonth;
     private int taskDueDay;
     private int taskDueYear;
-
-    private DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 
     public ProjectTask(EditText taskName, TextView dueDate, CheckBox completedStatus)
     {
