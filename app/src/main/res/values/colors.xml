@@ -12,6 +12,7 @@
     <color name="sky_blue">#1ddcfb</color>
     <color name="pink">#FF00A2</color>
     <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 
     <!-- Additional Test Colors-->
     <color name="brown">#4B3A2D</color>
