@@ -58,7 +58,6 @@ public class ProjectTask
 
     public void clearError()
     {
-        errorMessageContainer.setVisibility(View.VISIBLE);
         dueDateTextView.setError(null);
         dueDateErrorMsgTextView.setText("");
         errorMessageContainer.setVisibility(View.GONE);
@@ -66,20 +65,7 @@ public class ProjectTask
 
     public void setError(String errorMsg)
     {
-        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
         dueDateTextView.setError("");
-
-        if (currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN)
-        {
-            dueDateErrorMsgTextView.setBackground(Resources.getSystem()
-                    .getDrawable(R.drawable.error_msg_popup_background));
-        }
-        else
-        {
-            dueDateErrorMsgTextView.setBackgroundDrawable(Resources.getSystem()
-                    .getDrawable(R.drawable.error_msg_popup_background));
-        }
-
         dueDateErrorMsgTextView.setText(errorMsg);
         errorMessageContainer.setVisibility(View.VISIBLE);
     }

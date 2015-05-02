@@ -33,8 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/taskName"
-        android:layout_alignParentLeft="true"
-        >
+        android:layout_alignParentLeft="true" >
 
         <RelativeLayout
             android:id="@+id/taskDueDateButton"
@@ -80,7 +79,7 @@
             android:layout_toLeftOf="@+id/taskCompletedStatus"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="-15dp"
+            android:layout_marginTop="-10dp"
             android:visibility="gone">
 
             <TextView
@@ -110,8 +109,11 @@
                     android:paddingLeft="17dp"
                     android:paddingRight="15dp"
                     android:paddingTop="14dp"
+                    android:paddingBottom="7dp"
                     android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"/>
+                    android:layout_alignParentRight="true"
+                    android:background="@drawable/error_msg_popup_background"/>
+
             </RelativeLayout>
 
         </RelativeLayout>
@@ -122,9 +124,8 @@
             android:layout_height="wrap_content"
             android:text="complete"
             android:textColor="@color/black"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:layout_above="@+id/taskDueDateErrorMsgContainer"
+            android:layout_alignTop="@+id/taskDueDateButton"
+            android:layout_alignBottom="@+id/taskDueDateButton"
             android:layout_toLeftOf="@+id/removeTaskButton"
             android:layout_toStartOf="@+id/removeTaskButton"/>
 
@@ -133,13 +134,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/remove_btn_icon"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
+            android:layout_alignTop="@+id/taskCompletedStatus"
+            android:layout_alignBottom="@+id/taskCompletedStatus"
             android:paddingStart="10dp"
             android:paddingLeft="10dp"
             android:paddingEnd="10dp"
             android:paddingRight="10dp"
-            android:layout_alignBottom="@+id/taskCompletedStatus"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"/>
 

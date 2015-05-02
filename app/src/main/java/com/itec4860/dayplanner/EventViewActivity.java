@@ -75,7 +75,7 @@ public class EventViewActivity extends Activity
         projectNameEditText = (EditText) findViewById(R.id.projectNameEditText);
         startDateTextView = (TextView) findViewById(R.id.startDateText);
         dueDateTextView = (TextView) findViewById(R.id.dueDateText);
-        dueDateErrorMessage = (TextView) findViewById(R.id.dueDateErrorMsg);
+        dueDateErrorMessage = (TextView) findViewById(R.id.projectDueDateErrorMsg);
 
         taskListContainer = (LinearLayout) findViewById(R.id.taskContainer);
 
@@ -232,7 +232,7 @@ public class EventViewActivity extends Activity
         taskDueDateTextView.setText(projectStartDate);
         CheckBox taskCompletedStatusBox = (CheckBox) taskItemRow.findViewById(R.id.taskCompletedStatus);
         RelativeLayout errorMsgContainer = (RelativeLayout) taskItemRow.findViewById(R.id.taskDueDateErrorMsgContainer);
-        TextView dueDateErrorMessageTextView = (TextView) taskItemRow.findViewById(R.id.dueDateErrorMsg);
+        TextView dueDateErrorMessageTextView = (TextView) taskItemRow.findViewById(R.id.taskDueDateErrorMsg);
 
         // adds task to task list array
         final ProjectTask newTask = new ProjectTask(taskNameEditText, taskDueDateTextView, taskCompletedStatusBox,
