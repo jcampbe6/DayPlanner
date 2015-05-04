@@ -34,6 +34,12 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.itec4860.dayplanner.database.Event;
+import com.itec4860.dayplanner.database.EventDAO;
+import com.itec4860.dayplanner.database.Project;
+import com.itec4860.dayplanner.database.ProjectDAO;
+import com.itec4860.dayplanner.database.Task;
+import com.itec4860.dayplanner.database.TaskDAO;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,6 +81,7 @@ public class EventViewActivity extends Activity
 
     // data for saving event
     private final String TAG = "save event";
+    private String userID;
     private String eventType;
     private String projectName;
     private static String projectStartDate;
@@ -99,6 +106,9 @@ public class EventViewActivity extends Activity
 
         Spinner eventTypeSpinner = (Spinner) findViewById(R.id.eventTypeSpinner);
         eventTypeSpinner.setSelection(0);
+
+        SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
+        userID = dayPlannerSettings.getString("userID", "user id not set");
 
         projectNameEditText = (EditText) findViewById(R.id.projectNameEditText);
         startDateTextView = (TextView) findViewById(R.id.startDateText);
@@ -487,6 +497,38 @@ public class EventViewActivity extends Activity
      */
     public void saveEvent(View view)
     {
+        // save event, project and task data in SQLite database
+        if (validateProjectFields())
+        {
+            // save event in sqlite event table
+            EventDAO eventDAO = new EventDAO(getApplicationContext());
+            Event newEvent = eventDAO.createEvent(projectName, eventType);
+
+            // save project in sqlite project table
+            int hasTask = 0;
+            if(taskList.size() > 0)
+            {
+                hasTask = 1;
+            }
+            ProjectDAO projectDAO = new ProjectDAO(getApplicationContext());
+            Project project = projectDAO.createProject(newEvent.getEventID(), projectStartDate, projectDueDate,
+                    hasTask);
+
+            // save tasks in sqlite task table
+            if (taskList.size() > 0)
+            {
+                for (ProjectTask task : taskList)
+                {
+                    TaskDAO taskDAO = new TaskDAO(getApplicationContext());
+                    Task newTask = taskDAO.createTask(project.getProjectID(), task.getTaskName(),
+                            task.getDueDate(), task.isTaskCompleted());
+                }
+            }
+        }
+
+
+
+
         if (!hasInternetConnection())
         {
             Toast.makeText(getApplicationContext(), "No internet connectivity", Toast.LENGTH_SHORT).show();
@@ -568,8 +610,8 @@ public class EventViewActivity extends Activity
 
                     // project data
                     params.put("tag", TAG);
-                    SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
-                    params.put("userID", dayPlannerSettings.getString("userID", "user id not set"));
+
+                    params.put("userID", userID);
                     params.put("type", eventType);
                     params.put("title", projectName);
                     params.put("start date", projectStartDate);

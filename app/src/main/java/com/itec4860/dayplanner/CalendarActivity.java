@@ -1,5 +1,6 @@
 package com.itec4860.dayplanner;
 
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,6 +32,8 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.itec4860.dayplanner.database.Project;
+import com.itec4860.dayplanner.database.ProjectDAO;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,6 +44,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -73,8 +77,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private int year;
     private String currentDate;
     private String selectedDate;
-    private ArrayList<JSONObject> eventArray;
     private String userID;
+    private DateInfoHolder tempDateInfoHolder;
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
@@ -102,7 +106,6 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         // sets spinner selection to 'Month'
         actionBar.setSelectedNavigationItem(0);
 
-        eventArray = new ArrayList<>();
         SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
         userID = dayPlannerSettings.getString("userID", "user id not set");
 
@@ -153,9 +156,12 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
                 DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
                 markSelectedDate(dateInfoHolder.getDate());
 
-                retrieveEventCount(dateInfoHolder);
+                tempDateInfoHolder = dateInfoHolder;
+
+                List<Project> projectList = retrieveEventsByDate(dateInfoHolder.getDate());
+
                 // TODO - for testing
-//                Toast.makeText(getApplicationContext(), dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), projectList.toString(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -199,7 +205,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         adapter.notifyDataSetChanged();
 
         // todo: retrieve events
-        retrieveEvents(date);
+//        retrieveEvents(date);
     }
 
     /**
@@ -266,7 +272,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
                 String.valueOf(yearOfPrevMonth), getApplicationContext().getResources()
                 .getColor(R.color.nextAndPrevMonthDateColor));
 
-            retrieveEventCount(tempDateHolder);
+            int eventCount = retrieveEventCountByDate(tempDateHolder.getDate());
+            tempDateHolder.setEventCount(eventCount);
 
             adapter.addItem(tempDateHolder);
         }
@@ -278,7 +285,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
                     String.valueOf(year), getApplicationContext().getResources()
                     .getColor(R.color.currentMonthDateColor));
 
-            retrieveEventCount(tempDateHolder);
+            int eventCount = retrieveEventCountByDate(tempDateHolder.getDate());
+            tempDateHolder.setEventCount(eventCount);
 
             adapter.addItem(tempDateHolder);
         }
@@ -291,7 +299,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
                     String.valueOf(yearOfNextMonth), getApplicationContext().getResources()
                     .getColor(R.color.nextAndPrevMonthDateColor));
 
-            retrieveEventCount(tempDateHolder);
+            int eventCount = retrieveEventCountByDate(tempDateHolder.getDate());
+            tempDateHolder.setEventCount(eventCount);
 
             adapter.addItem(tempDateHolder);
         }
@@ -395,6 +404,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         DateInfoHolder dateInfoHolder = adapter.getItem(info.position);
         markSelectedDate(dateInfoHolder.getDate());
+
+        tempDateInfoHolder = dateInfoHolder;
 
         menu.setHeaderTitle(dateInfoHolder.getDate());
 
@@ -566,241 +577,30 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     {
         super.onResume();
         getSupportActionBar().setSelectedNavigationItem(0); // set spinner to 'Month'
+
+        if (tempDateInfoHolder != null)
+        {
+            Toast.makeText(getApplicationContext(), tempDateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
+            int count = retrieveEventCountByDate(tempDateInfoHolder.getDate());
+            tempDateInfoHolder.setEventCount(count);
+            adapter.notifyDataSetChanged();
+        }
     }
 
-    private void retrieveEvents(final String date)
+    private List<Project> retrieveEventsByDate(String date)
     {
-        if (!hasInternetConnection())
-        {
-            Toast.makeText(getApplicationContext(), "No internet connectivity, could not retrieve events",
-                    Toast.LENGTH_SHORT).show();
-        }
-
-        else
-        {
-            RequestQueue queue = Volley.newRequestQueue(this);
-
-            Response.Listener<String> apiResponseListener = new Response.Listener<String>()
-            {
-                @Override
-                public void onResponse(String response)
-                {
-                    try
-                    {
-                        JSONObject jsonResponse = new JSONObject(response);
-                        boolean error = jsonResponse.getBoolean("error");
-                        if (error)
-                        {
-                            String errorMsg = jsonResponse.getString("errorMsg");
-                            Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                        }
-
-                        else
-                        {
-                            // todo: do something
-                            eventArray.clear();
-                            int eventCount = jsonResponse.getInt("eventCount");
-
-                            for (int i = 1; i <= eventCount; i++)
-                            {
-                                JSONObject event = (JSONObject)jsonResponse.get("event" + i);
-//                                eventMap.put("event" + i, event);
-                                eventArray.add(event);
-                            }
-
-//                            Toast.makeText(getApplicationContext(), eventArray.toString(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                    catch (JSONException e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    // TODO: for api response testing
-//                    Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-                }
-            };
-
-            Response.ErrorListener errorListener = new Response.ErrorListener()
-            {
-                @Override
-                public void onErrorResponse(VolleyError error)
-                {
-                    String errorMsg;
-                    if (error instanceof TimeoutError)
-                    {
-                        errorMsg = "Request timed out";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                    else if (error instanceof NoConnectionError)
-                    {
-                        errorMsg = "Network is unreachable, please check your internet connection";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                    else if (error instanceof ServerError)
-                    {
-                        errorMsg = "Server error";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-
-                    // TODO: for request error response testing
-//                    Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
-                }
-            };
-
-            StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.day_planner_api_url),
-                    apiResponseListener, errorListener)
-            {
-                @Override
-                protected Map<String, String> getParams()
-                {
-                    Map<String, String> params = new HashMap<>();
-
-                    // project data
-                    params.put("tag", TAG);
-                    params.put("userID", userID);
-                    params.put("date", date);
-
-                    return params;
-                }
-            };
-
-            queue.add(strRequest);
-        }
+        ProjectDAO projectDAO = new ProjectDAO(getApplicationContext());
+        return projectDAO.getAllProjectsByDate(date);
     }
 
     /**
      * Method: retrieveEventCount
      * Retrieves the number of events for the specified date from the Day Planner database.
-     * @param dateHolder the holder of the specified date
      */
-    private void retrieveEventCount(final DateInfoHolder dateHolder)
+    private int retrieveEventCountByDate(String date)
     {
-        if (!hasInternetConnection())
-        {
-            Toast.makeText(getApplicationContext(), "No internet connectivity, could not retrieve events",
-                    Toast.LENGTH_SHORT).show();
-        }
-
-        else
-        {
-            final RequestQueue queue = Volley.newRequestQueue(this);
-
-            Response.Listener<String> apiResponseListener = new Response.Listener<String>()
-            {
-                @Override
-                public void onResponse(String response)
-                {
-                    try
-                    {
-                        JSONObject jsonResponse = new JSONObject(response);
-                        boolean error = jsonResponse.getBoolean("error");
-                        if (error)
-                        {
-                            String errorMsg = jsonResponse.getString("errorMsg");
-                            Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                        }
-
-                        else
-                        {
-                            // todo: do something
-                            dateHolder.setEventCount(jsonResponse.getInt("eventCount"));
-
-                            if (dateHolder.getEventCount() > 0)
-                            {
-
-                                Toast.makeText(getApplicationContext(), "" + dateHolder.getEventCount(),
-                                        Toast.LENGTH_LONG).show();
-                            }
-                            else
-                            {
-//                                queue.getCache().remove(getString(R.string.day_planner_api_url));
-                            }
-                        }
-                    }
-                    catch (JSONException e)
-                    {
-                        e.printStackTrace();
-                    }
-
-                    // TODO: for api response testing
-//                    Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-                }
-            };
-
-            Response.ErrorListener errorListener = new Response.ErrorListener()
-            {
-                @Override
-                public void onErrorResponse(VolleyError error)
-                {
-                    String errorMsg;
-                    if (error instanceof TimeoutError)
-                    {
-                        errorMsg = "Request timed out";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                    else if (error instanceof NoConnectionError)
-                    {
-                        errorMsg = "Network is unreachable, please check your internet connection";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                    else if (error instanceof ServerError)
-                    {
-                        errorMsg = "Server error";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-
-                    // TODO: for request error response testing
-//                    Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
-                }
-            };
-
-            StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.day_planner_api_url),
-                    apiResponseListener, errorListener)
-            {
-                @Override
-                protected Map<String, String> getParams()
-                {
-                    Map<String, String> params = new HashMap<>();
-
-                    // project data
-                    params.put("tag", TAG);
-                    params.put("userID", userID);
-                    params.put("date", dateHolder.getDate());
-
-                    return params;
-                }
-            };
-
-            if (queue.getCache().get(getString(R.string.day_planner_api_url)) != null)
-            {
-
-                String cachedResponse = new String(queue.getCache().get(getString(R.string.day_planner_api_url)).data);
-                Toast.makeText(getApplicationContext(), cachedResponse, Toast.LENGTH_LONG).show();
-
-                try
-                {
-                    JSONObject jsonResponse = new JSONObject(cachedResponse);
-                    dateHolder.setEventCount(jsonResponse.getInt("eventCount"));
-
-                    if (dateHolder.getEventCount() > 0)
-                    {
-
-                        Toast.makeText(getApplicationContext(), "" + dateHolder.getEventCount(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                }
-                catch (JSONException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-
-            else
-            {
-                queue.add(strRequest);
-            }
-        }
+        ProjectDAO projectDAO = new ProjectDAO(getApplicationContext());
+        return projectDAO.getProjectCountByDate(date);
     }
 
     /**
