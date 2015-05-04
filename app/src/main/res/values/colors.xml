@@ -6,8 +6,17 @@
 	<color name="currentMonthDateColor">#000000</color>
     <color name="nextAndPrevMonthDateColor">#D3D3D3</color>
 
+    <!-- Basic App Colors-->
+    <color name="red_warning">#e30000</color>
+    <color name="orange">#ffa900</color>
+    <color name="sky_blue">#1ddcfb</color>
+    <color name="pink">#FF00A2</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 
+    <!-- Additional Test Colors-->
     <color name="brown">#4B3A2D</color>
     <color name="lt_brown">#5d4e42</color>
     <color name="green">#20B035</color>
+    <color name="grey">#aaaaaa</color>
 </resources>

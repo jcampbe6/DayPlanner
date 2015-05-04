@@ -14,24 +14,23 @@ if (isset($_POST["tag"]) && $_POST["tag"] != "")
 {
 	// get tag
 	$tag = $_POST["tag"];
-
-	// include database handler
-    include_once 'DayPlannerDatabaseHandler.php';
-	$databaseHandler = new DayPlannerDatabaseHandler();
 	
 	// response Array in JSON format
 	$jsonResponse = array("error" => false);
 
     // check "tag" for request type
-    // so far the possible request types are: 'register' and 'login'
+    // so far the possible request types are: 'register', 'login' and 'save event'
     if ($tag == "register")
     {
+        include_once 'UserRegLoginHandler.php';
+        $userRegHandler = new UserRegLoginHandler();
+
         $regUsername = $_POST["username"];
 		$regEmail = $_POST["email"];
 		$regPassword = $_POST["password"];
 
 		// check if user already exists
-        $errorMsg = $databaseHandler->doesUserExist($regUsername, $regEmail);
+        $errorMsg = $userRegHandler->doesUserExist($regUsername, $regEmail);
 
 		if ($errorMsg) // user already exists --> respond with error message
         {
@@ -43,7 +42,7 @@ if (isset($_POST["tag"]) && $_POST["tag"] != "")
 
 		else // there is no error message --> user doesn't exist --> store user
         {
-			$registeredUser = $databaseHandler->storeUser($regUsername, $regEmail, $regPassword);
+			$registeredUser = $userRegHandler->storeUser($regUsername, $regEmail, $regPassword);
 
 			if ($registeredUser) // user stored successfully
             {
@@ -65,12 +64,15 @@ if (isset($_POST["tag"]) && $_POST["tag"] != "")
 
     else if ($tag == "login")
     {
+        include_once 'UserRegLoginHandler.php';
+        $userLoginHandler = new UserRegLoginHandler();
+
         // Request type is check Login
         $loginUsernameOrEmail = $_POST['usernameOrEmail'];
         $loginPassword = $_POST['password'];
 
         // check for user
-        $authenticatedUser = $databaseHandler->authenticateUser($loginUsernameOrEmail, $loginPassword);
+        $authenticatedUser = $userLoginHandler->authenticateUser($loginUsernameOrEmail, $loginPassword);
 
         if ($authenticatedUser) // user email and password match
         {
@@ -89,7 +91,18 @@ if (isset($_POST["tag"]) && $_POST["tag"] != "")
         }
     }
 
-	else // received a tag other than 'register' or 'login'
+    else if ($tag == "save event")
+    {
+        include_once 'EventHandler.php';
+        $saveEventHandler = new EventHandler();
+
+        unset($_POST['tag']); // removes tag to send only what is needed to saveEvent
+        $eventData = $_POST;
+        $saveEventHandler->saveEvent($eventData);
+        echo json_encode($jsonResponse);
+    }
+
+	else // received a tag other than 'register', 'login' or 'save event'
     {
         $jsonResponse["error"] = true;
         $jsonResponse["errorMsg"] = "Invalid request.";
