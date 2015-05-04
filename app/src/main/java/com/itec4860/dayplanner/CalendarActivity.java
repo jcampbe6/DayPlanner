@@ -344,6 +344,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         {
             setCalendarToCurrentDate();
             updateCalendarUI();
+            fillEventListData(currentDate);
+            eventListAdapter.notifyDataSetChanged();
         }
 
         return super.onOptionsItemSelected(item);
@@ -494,6 +496,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         fillCalendar();
         adapter.notifyDataSetChanged();
         calendarGrid.setAdapter(adapter);
+        eventListAdapter.clearProjects();
+        eventListAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -578,7 +582,6 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         if (tempDateInfoHolder != null)
         {
-            Toast.makeText(getApplicationContext(), tempDateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
             int count = retrieveEventCountByDate(tempDateInfoHolder.getDate());
             tempDateInfoHolder.setEventCount(count);
             adapter.notifyDataSetChanged();

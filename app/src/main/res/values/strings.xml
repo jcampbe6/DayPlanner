@@ -7,7 +7,7 @@
     <string-array name="toggle_calendar_options_list">
         <item>Month</item>
         <item>Week</item>
-        <item>Day</item>
+        <!--<item>Day</item>-->
     </string-array>
     <string name="title_activity_calendar_activity_weekly">CalendarActivityWeekly</string>
 
