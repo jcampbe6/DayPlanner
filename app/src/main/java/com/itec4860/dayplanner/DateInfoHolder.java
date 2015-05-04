@@ -23,6 +23,7 @@ public class DateInfoHolder
     private String year;
     private int textColor;
     private ImageView selectedDayImage;
+    private int eventCount;
 
     /**
      * Constructor: DateInfoHolder
@@ -39,6 +40,7 @@ public class DateInfoHolder
         this.day = day;
         this.year = year;
         this.textColor = textColor;
+        eventCount = 0;
     }
 
     public String getMonth()
@@ -89,5 +91,15 @@ public class DateInfoHolder
     public void setSelectedDayImage(ImageView selectedDayImage)
     {
         this.selectedDayImage = selectedDayImage;
+    }
+
+    public void setEventCount(int eventCount)
+    {
+        this.eventCount = eventCount;
+    }
+
+    public int getEventCount()
+    {
+        return eventCount;
     }
 }

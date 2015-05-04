@@ -134,6 +134,8 @@ public class CalendarGridAdapter extends BaseAdapter
         gridCellText.setTextColor(dateInfoHolder.getDateTextColor());
         gridCellText.setText(dateInfoHolder.getDay());
 
+        TextView gridCellNumEvents = (TextView) cell.findViewById(R.id.numEvents);
+
         if (dateInfoHolder.getDate().equals(todaysDate))
         {
             dateInfoHolder.getSelectedDayImage().setImageResource(R.drawable.circle_solid);
@@ -149,6 +151,11 @@ public class CalendarGridAdapter extends BaseAdapter
         else
         {
             dateInfoHolder.getSelectedDayImage().setImageResource(R.drawable.circle_invisible);
+        }
+
+        if (dateInfoHolder.getEventCount() > 0)
+        {
+            gridCellNumEvents.setText("" + dateInfoHolder.getEventCount());
         }
 
         cell.setTag(dateInfoHolder);

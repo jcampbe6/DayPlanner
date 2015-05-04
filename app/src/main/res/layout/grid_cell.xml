@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#ffffff">
+    android:background="@color/white">
 
     <RelativeLayout
+        android:id="@+id/date"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:padding="10dp">
@@ -30,13 +30,16 @@
 
     </RelativeLayout>
 
-
     <TextView
-        android:id="@+id/numEventsPerDay"
+        android:id="@+id/numEvents"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:layout_gravity="end"
-        style="@style/calendar_event_style"/>
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/green"
+        android:textAppearance="@android:style/TextAppearance.Small"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:paddingRight="2dp"
+        android:paddingEnd="2dp"/>
 
 </RelativeLayout>

@@ -80,9 +80,16 @@ public class ProjectTask
         return dueDateTextView.getText().toString();
     }
 
-    public boolean isTaskCompleted()
+    public int isTaskCompleted()
     {
-        return completedStatusCheckBox.isChecked();
+        if (completedStatusCheckBox.isChecked())
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     public void setMonthDayYear(int month, int day, int year)

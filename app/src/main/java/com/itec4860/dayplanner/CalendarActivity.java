@@ -1,6 +1,10 @@
 package com.itec4860.dayplanner;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -14,12 +18,17 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.itec4860.dayplanner.sqliteDatabase.Project;
+import com.itec4860.dayplanner.sqliteDatabase.ProjectDAO;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 /**Class: CalendarActivity
@@ -51,10 +60,17 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private int year;
     private String currentDate;
     private String selectedDate;
+    private String userID;
+    private DateInfoHolder tempDateInfoHolder;
+    private ListView eventsListView;
+    private ProjectDAO projectDAO;
+    private EventListAdapter eventListAdapter;
+    private List<Project> projectList;
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
     private final int[] DAYS_OF_THE_MONTHS = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    private final String TAG = "retrieve events";
 
     // variables for saving and retrieving instance state data
     private static final String STATE_MONTH = "month";
@@ -76,6 +92,9 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         // sets spinner selection to 'Month'
         actionBar.setSelectedNavigationItem(0);
+
+        SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
+        userID = dayPlannerSettings.getString("userID", "user id not set");
 
         prevMonthButton = (ImageButton) this.findViewById(R.id.prevMonth);
         prevMonthButton.setOnClickListener(this);
@@ -102,14 +121,17 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DATE))
         {
-            selectedDate = savedInstanceState.getString(STATE_SELECTED_DATE);
-            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate,selectedDate);
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
+            markSelectedDate(savedInstanceState.getString(STATE_SELECTED_DATE));
         }
 
         else
         {
             adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
+            markSelectedDate(currentDate);
         }
+
+        projectDAO = new ProjectDAO(getApplicationContext());
 
         fillCalendar();
         adapter.notifyDataSetChanged();
@@ -122,11 +144,18 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
             {
                 DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
                 markSelectedDate(dateInfoHolder.getDate());
+                tempDateInfoHolder = dateInfoHolder;
 
-                // TODO - for testing
-                Toast.makeText(getApplicationContext(), dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
+                fillEventListData(dateInfoHolder.getDate());
+                eventListAdapter.notifyDataSetChanged();
             }
         });
+
+        eventsListView = (ListView) findViewById(R.id.eventListView);
+        eventListAdapter = new EventListAdapter(getApplicationContext());
+        fillEventListData(selectedDate);
+        eventListAdapter.notifyDataSetChanged();
+        eventsListView.setAdapter(eventListAdapter);
     }
 
     /**
@@ -166,6 +195,15 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         selectedDate = date;
         adapter.setSelectedDate(date);
         adapter.notifyDataSetChanged();
+
+        // todo: retrieve events
+//        retrieveEvents(date);
+    }
+
+    private void fillEventListData(String date)
+    {
+        projectList = projectDAO.getAllProjectsByDate(date);
+        eventListAdapter.addProjectList(projectList);
     }
 
     /**
@@ -228,26 +266,41 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         {
             int leadingDayOfMonth = daysInPrevMonth - numOfLeadingDays + i;
 
-            adapter.addItem(new DateInfoHolder(String.valueOf(prevMonth), String.valueOf(leadingDayOfMonth),
-                    String.valueOf(yearOfPrevMonth), getApplicationContext().getResources()
-                    .getColor(R.color.nextAndPrevMonthDateColor)));
+            DateInfoHolder tempDateHolder = new DateInfoHolder(String.valueOf(prevMonth), String.valueOf(leadingDayOfMonth),
+                String.valueOf(yearOfPrevMonth), getApplicationContext().getResources()
+                .getColor(R.color.nextAndPrevMonthDateColor));
+
+            int eventCount = retrieveEventCountByDate(tempDateHolder.getDate());
+            tempDateHolder.setEventCount(eventCount);
+
+            adapter.addItem(tempDateHolder);
         }
 
         //add info for each day of the current month to the cell info list
         for (int i = 1; i <= daysInCurrentMonth; i++)
         {
-            adapter.addItem(new DateInfoHolder(String.valueOf(month), String.valueOf(i),
+            DateInfoHolder tempDateHolder = new DateInfoHolder(String.valueOf(month), String.valueOf(i),
                     String.valueOf(year), getApplicationContext().getResources()
-                    .getColor(R.color.currentMonthDateColor)));
+                    .getColor(R.color.currentMonthDateColor));
+
+            int eventCount = retrieveEventCountByDate(tempDateHolder.getDate());
+            tempDateHolder.setEventCount(eventCount);
+
+            adapter.addItem(tempDateHolder);
         }
 
         //add info for each day of the next month that trails out of the last week of the current
         //month to the cell info list
         for (int i = 0; i < adapter.getCount() % 7; i++)
         {
-            adapter.addItem(new DateInfoHolder(String.valueOf(nextMonth), String.valueOf(i + 1),
+            DateInfoHolder tempDateHolder = new DateInfoHolder(String.valueOf(nextMonth), String.valueOf(i + 1),
                     String.valueOf(yearOfNextMonth), getApplicationContext().getResources()
-                    .getColor(R.color.nextAndPrevMonthDateColor)));
+                    .getColor(R.color.nextAndPrevMonthDateColor));
+
+            int eventCount = retrieveEventCountByDate(tempDateHolder.getDate());
+            tempDateHolder.setEventCount(eventCount);
+
+            adapter.addItem(tempDateHolder);
         }
     }
 
@@ -349,6 +402,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         DateInfoHolder dateInfoHolder = adapter.getItem(info.position);
         markSelectedDate(dateInfoHolder.getDate());
+
+        tempDateInfoHolder = dateInfoHolder;
 
         menu.setHeaderTitle(dateInfoHolder.getDate());
 
@@ -520,5 +575,40 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     {
         super.onResume();
         getSupportActionBar().setSelectedNavigationItem(0); // set spinner to 'Month'
+
+        if (tempDateInfoHolder != null)
+        {
+            Toast.makeText(getApplicationContext(), tempDateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
+            int count = retrieveEventCountByDate(tempDateInfoHolder.getDate());
+            tempDateInfoHolder.setEventCount(count);
+            adapter.notifyDataSetChanged();
+
+            fillEventListData(tempDateInfoHolder.getDate());
+            eventListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * Method: retrieveEventCount
+     * Retrieves the number of events for the specified date from the Day Planner database.
+     */
+    private int retrieveEventCountByDate(String date)
+    {
+        return projectDAO.getProjectCountByDate(date);
+    }
+
+    /**
+     * Method: hasInternetConnection
+     * Checks to see if the mobile device has an active internet connection.
+     * @return isConnected the boolean result of the verification
+     */
+    private boolean hasInternetConnection()
+    {
+        ConnectivityManager connManager = (ConnectivityManager)getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = connManager.getActiveNetworkInfo();
+
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }
