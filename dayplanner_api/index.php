@@ -102,7 +102,51 @@ if (isset($_POST["tag"]) && $_POST["tag"] != "")
         echo json_encode($jsonResponse);
     }
 
-	else // received a tag other than 'register', 'login' or 'save event'
+    else if ($tag == "retrieve events")
+    {
+        include_once 'EventHandler.php';
+        $retrieveEventHandler = new EventHandler();
+
+        $userId = $_POST['userID'];
+        $date = $_POST['date'];
+
+        $events = $retrieveEventHandler->retrieveEvents($userId, $date);
+
+        $eventCount = 0;
+        foreach ($events as $event)
+        {
+            $eventCount++;
+            $jsonResponse["event$eventCount"] = $event;
+        }
+
+        $jsonResponse["eventCount"] = $eventCount;
+
+        echo json_encode($jsonResponse);
+
+    }
+
+    else if ($tag == "retrieve event count")
+    {
+        include_once 'EventHandler.php';
+        $retrieveEventCountHandler = new EventHandler();
+
+        $userId = $_POST['userID'];
+        $date = $_POST['date'];
+
+        $events = $retrieveEventHandler->retrieveEvents($userId, $date);
+
+        $eventCount = 0;
+        foreach ($events as $event)
+        {
+            $eventCount++;
+        }
+
+        $jsonResponse["eventCount"] = $eventCount;
+
+        echo json_encode($jsonResponse);
+    }
+
+	else // received a tag other than 'register', 'login', 'save event' or 'retrieve events'
     {
         $jsonResponse["error"] = true;
         $jsonResponse["errorMsg"] = "Invalid request.";

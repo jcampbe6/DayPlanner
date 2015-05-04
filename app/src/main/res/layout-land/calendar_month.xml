@@ -8,7 +8,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_weight=".6">
+        android:layout_weight=".5">
 
         <!-- Month Title Header -->
         <LinearLayout
@@ -129,12 +129,25 @@
 
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/eventListView"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight=".4">
+        android:orientation="vertical"
+        android:layout_weight=".5">
 
-    </ListView>
+        <ListView
+            android:id="@+id/eventListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </ListView>
+
+        <View
+            android:id="@+id/projectListItemDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/grey" />
+
+    </LinearLayout>
 
 </LinearLayout>

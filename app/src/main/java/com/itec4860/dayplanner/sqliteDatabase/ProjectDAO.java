@@ -1,4 +1,4 @@
-package com.itec4860.dayplanner.database;
+package com.itec4860.dayplanner.sqliteDatabase;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -121,6 +121,12 @@ public class ProjectDAO
         cursor.close();
 
         return projectList.size();
+    }
+
+    public Cursor getCursorForAllProjectsByDate(String date)
+    {
+        return database.query(dbHandler.TABLE_PROJECT, allColumns, dbHandler.COLUMN_PROJECT_START_DATE +
+                " = ?", new String[]{date}, null, null, null);
     }
 
     protected Project cursorToProject(Cursor cursor)

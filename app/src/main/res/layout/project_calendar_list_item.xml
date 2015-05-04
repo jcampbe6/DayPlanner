@@ -17,6 +17,17 @@
         android:padding="10dp">
 
         <TextView
+            android:id="@+id/projectTitleLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/projectListItemTitle"
+            android:layout_alignRight="@+id/projectListItemTitle"
+            android:text="Title"
+            android:gravity="center"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:textColor="@color/grey"/>
+
+        <TextView
             android:id="@+id/projectListItemTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -24,7 +35,19 @@
             android:textAppearance="@android:style/TextAppearance.Medium"
             android:text="Project Title"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"/>
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/projectTitleLabel"/>
+
+        <TextView
+            android:id="@+id/projectStartDateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/projectListItemStartDate"
+            android:layout_alignRight="@+id/projectListItemStartDate"
+            android:text="Start Date"
+            android:gravity="center"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:textColor="@color/grey"/>
 
         <TextView
             android:id="@+id/projectListItemStartDate"
@@ -33,7 +56,19 @@
             android:textColor="@color/black"
             android:textAppearance="@android:style/TextAppearance.Medium"
             android:text="Start Date"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/projectStartDateLabel"/>
+
+        <TextView
+            android:id="@+id/projectDueDateLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/projectListItemDueDate"
+            android:layout_alignRight="@+id/projectListItemDueDate"
+            android:text="End Date"
+            android:gravity="center"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:textColor="@color/grey"/>
 
         <TextView
             android:id="@+id/projectListItemDueDate"
@@ -43,7 +78,8 @@
             android:textAppearance="@android:style/TextAppearance.Medium"
             android:text="Due Date"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/projectDueDateLabel"/>
 
     </RelativeLayout>
 

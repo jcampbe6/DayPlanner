@@ -1,6 +1,5 @@
 package com.itec4860.dayplanner;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,34 +18,18 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.NoConnectionError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.ServerError;
-import com.android.volley.TimeoutError;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.itec4860.dayplanner.database.Project;
-import com.itec4860.dayplanner.database.ProjectDAO;
+import com.itec4860.dayplanner.sqliteDatabase.Project;
+import com.itec4860.dayplanner.sqliteDatabase.ProjectDAO;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**Class: CalendarActivity
  * @author Joshua Campbell
@@ -79,6 +62,10 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private String selectedDate;
     private String userID;
     private DateInfoHolder tempDateInfoHolder;
+    private ListView eventsListView;
+    private ProjectDAO projectDAO;
+    private EventListAdapter eventListAdapter;
+    private List<Project> projectList;
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
@@ -144,6 +131,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
             markSelectedDate(currentDate);
         }
 
+        projectDAO = new ProjectDAO(getApplicationContext());
+
         fillCalendar();
         adapter.notifyDataSetChanged();
         calendarGrid.setAdapter(adapter);
@@ -155,15 +144,18 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
             {
                 DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
                 markSelectedDate(dateInfoHolder.getDate());
-
                 tempDateInfoHolder = dateInfoHolder;
 
-                List<Project> projectList = retrieveEventsByDate(dateInfoHolder.getDate());
-
-                // TODO - for testing
-                Toast.makeText(getApplicationContext(), projectList.toString(), Toast.LENGTH_SHORT).show();
+                fillEventListData(dateInfoHolder.getDate());
+                eventListAdapter.notifyDataSetChanged();
             }
         });
+
+        eventsListView = (ListView) findViewById(R.id.eventListView);
+        eventListAdapter = new EventListAdapter(getApplicationContext());
+        fillEventListData(selectedDate);
+        eventListAdapter.notifyDataSetChanged();
+        eventsListView.setAdapter(eventListAdapter);
     }
 
     /**
@@ -206,6 +198,12 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         // todo: retrieve events
 //        retrieveEvents(date);
+    }
+
+    private void fillEventListData(String date)
+    {
+        projectList = projectDAO.getAllProjectsByDate(date);
+        eventListAdapter.addProjectList(projectList);
     }
 
     /**
@@ -584,13 +582,10 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
             int count = retrieveEventCountByDate(tempDateInfoHolder.getDate());
             tempDateInfoHolder.setEventCount(count);
             adapter.notifyDataSetChanged();
-        }
-    }
 
-    private List<Project> retrieveEventsByDate(String date)
-    {
-        ProjectDAO projectDAO = new ProjectDAO(getApplicationContext());
-        return projectDAO.getAllProjectsByDate(date);
+            fillEventListData(tempDateInfoHolder.getDate());
+            eventListAdapter.notifyDataSetChanged();
+        }
     }
 
     /**
@@ -599,7 +594,6 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
      */
     private int retrieveEventCountByDate(String date)
     {
-        ProjectDAO projectDAO = new ProjectDAO(getApplicationContext());
         return projectDAO.getProjectCountByDate(date);
     }
 

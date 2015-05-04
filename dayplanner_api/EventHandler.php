@@ -130,7 +130,7 @@ class EventHandler
         {
             $title = $task['task name'];
             $dueDate = $task['task due date'];
-            $completed = ($task['task completed status'] == "true"); // returns false if task completed status not == "true"
+            $completed = ($task['task completed status']);
 
             $saveTaskQuery = "INSERT INTO task(event_id, title, due_date, completed)
                               VALUES('$projectId', '$title', '$dueDate', '$completed')";
@@ -139,9 +139,19 @@ class EventHandler
         }
     }
 
-    public function retrieveEvents()
+    public function retrieveEvents($userId, $date)
     {
+        $retrieveEventsQuery = "SELECT *
+                               FROM project
+                               WHERE EXISTS
+                                (
+                                  SELECT event_id
+                                  FROM user_event
+                                  WHERE user_id =  '$userId'
+                                )
+                               AND start_date =  '$date'";
 
+        return $retrieveEventsResult = mysqli_query($this->dbConnection, $retrieveEventsQuery);
     }
 
     public function saveAppointment()

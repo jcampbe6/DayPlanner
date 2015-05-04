@@ -1,4 +1,4 @@
-package com.itec4860.dayplanner.database;
+package com.itec4860.dayplanner.sqliteDatabase;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

@@ -34,12 +34,12 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.itec4860.dayplanner.database.Event;
-import com.itec4860.dayplanner.database.EventDAO;
-import com.itec4860.dayplanner.database.Project;
-import com.itec4860.dayplanner.database.ProjectDAO;
-import com.itec4860.dayplanner.database.Task;
-import com.itec4860.dayplanner.database.TaskDAO;
+import com.itec4860.dayplanner.sqliteDatabase.Event;
+import com.itec4860.dayplanner.sqliteDatabase.EventDAO;
+import com.itec4860.dayplanner.sqliteDatabase.Project;
+import com.itec4860.dayplanner.sqliteDatabase.ProjectDAO;
+import com.itec4860.dayplanner.sqliteDatabase.Task;
+import com.itec4860.dayplanner.sqliteDatabase.TaskDAO;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -525,9 +525,6 @@ public class EventViewActivity extends Activity
                 }
             }
         }
-
-
-
 
         if (!hasInternetConnection())
         {
