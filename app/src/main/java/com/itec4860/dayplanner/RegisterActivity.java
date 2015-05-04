@@ -50,8 +50,6 @@ public class RegisterActivity extends Activity
     private EditText passwordEditText;
     private ProgressDialog regProgressDialog;
     private Context context;
-
-    private final String REGISTRATION_URL = "http://52.1.23.175";
     private final String TAG = "register";
 
     @Override
@@ -145,10 +143,16 @@ public class RegisterActivity extends Activity
                         {
                             // TODO: store user info in SQLite database -- must create database first
 
+                            // store user info in preferences
+                            String userID = jsonResponse.getString("userID");
+                            String username = jsonResponse.getString("username");
+
                             // sets the user's registration status within the application to 'true'
                             SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
                             SharedPreferences.Editor settingsEditor = dayPlannerSettings.edit();
                             settingsEditor.putBoolean("isUserRegistered", true);
+                            settingsEditor.putString("username", username);
+                            settingsEditor.putString("userID", userID);
                             settingsEditor.apply();
 
                             Intent viewCalendarIntent = new Intent(context, CalendarActivity.class);
@@ -162,7 +166,7 @@ public class RegisterActivity extends Activity
                     }
 
                     // TODO: for api response testing
-                    Toast.makeText(context, response, Toast.LENGTH_LONG).show();
+//                    Toast.makeText(context, response, Toast.LENGTH_LONG).show();
                 }
             };
 
@@ -191,11 +195,12 @@ public class RegisterActivity extends Activity
                     dismissRegProgressDialog();
 
                     // TODO: for error response testing
-                    Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
                 }
             };
 
-            StringRequest strRequest = new StringRequest(Request.Method.POST, REGISTRATION_URL, apiResponseListener, errorListener)
+            StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.day_planner_api_url),
+                    apiResponseListener, errorListener)
             {
                 @Override
                 protected Map<String, String> getParams()

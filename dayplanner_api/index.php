@@ -96,43 +96,10 @@ if (isset($_POST["tag"]) && $_POST["tag"] != "")
         include_once 'EventHandler.php';
         $saveEventHandler = new EventHandler();
 
-        // general event info
-        $eventTitle = $_POST['eventTitle'];
-        $eventType = $_POST['eventType'];
-
-        $eventType = $_POST['eventType'];
-        if ($eventType == "Project")
-        {
-            // project event-type info
-            $startDate = $_POST['startDate'];
-            $endDate = $_POST['endDate'];
-
-            $tasks = array("hasTask" => false);
-            if (isset($_POST['taskName']) && $_POST['taskName'][0] != "")
-            {
-                $tasks["hasTask"] = true;
-
-                for ($i = 0; $i < count($_POST['taskName']); $i++)
-                {
-                    $taskNum = $i + 1;
-                    if ($_POST['taskName'][$i] != "")
-                    {
-                        $tasks["task$taskNum"] = array("taskName" => $_POST['taskName'][$i], "dueDate" => $_POST['taskDueDate'][$i],
-                            "completed" => $_POST['completedStatus'][$i]);
-                    }
-                }
-            }
-
-            if ($saveEventHandler->saveNewProjectEvent())
-            {
-                echo json_encode($tasks). "<br><br>";
-            }
-        }
-
-        $userID = $_POST['userID'];
-
-
-        echo json_encode($_POST);
+        unset($_POST['tag']); // removes tag to send only what is needed to saveEvent
+        $eventData = $_POST;
+        $saveEventHandler->saveEvent($eventData);
+        echo json_encode($jsonResponse);
     }
 
 	else // received a tag other than 'register', 'login' or 'save event'

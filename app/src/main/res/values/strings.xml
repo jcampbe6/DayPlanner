@@ -2,6 +2,7 @@
     <string name="app_name">Day Planner</string>
     <string name="title_activity_calendar">Calendar</string>
     <string name="title_activity_event_view">Event</string>
+    <string name="day_planner_api_url">http://52.1.23.175</string>
 
     <string-array name="toggle_calendar_options_list">
         <item>Month</item>
@@ -15,7 +16,7 @@
 
     <string-array name="eventTypeSpinnerOptions">
         <item>Project</item>
-        <item>Appointment</item>
+        <!--<item>Appointment</item>-->
     </string-array>
 
 </resources>
