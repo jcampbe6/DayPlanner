@@ -121,4 +121,11 @@
         android:stretchMode="columnWidth"
         android:background="#dfdfdf"/>
 
+    <ListView
+        android:id="@+id/eventListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ListView>
+
 </LinearLayout>

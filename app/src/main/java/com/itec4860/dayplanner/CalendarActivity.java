@@ -1,6 +1,10 @@
 package com.itec4860.dayplanner;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -18,9 +22,27 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.NoConnectionError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**Class: CalendarActivity
  * @author Joshua Campbell
@@ -51,10 +73,13 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private int year;
     private String currentDate;
     private String selectedDate;
+    private ArrayList<JSONObject> eventArray;
+    private String userID;
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
     private final int[] DAYS_OF_THE_MONTHS = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    private final String TAG = "retrieve events";
 
     // variables for saving and retrieving instance state data
     private static final String STATE_MONTH = "month";
@@ -76,6 +101,10 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         // sets spinner selection to 'Month'
         actionBar.setSelectedNavigationItem(0);
+
+        eventArray = new ArrayList<>();
+        SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
+        userID = dayPlannerSettings.getString("userID", "user id not set");
 
         prevMonthButton = (ImageButton) this.findViewById(R.id.prevMonth);
         prevMonthButton.setOnClickListener(this);
@@ -102,13 +131,14 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DATE))
         {
-            selectedDate = savedInstanceState.getString(STATE_SELECTED_DATE);
-            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate,selectedDate);
+            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
+            markSelectedDate(savedInstanceState.getString(STATE_SELECTED_DATE));
         }
 
         else
         {
             adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
+            markSelectedDate(currentDate);
         }
 
         fillCalendar();
@@ -123,8 +153,9 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
                 DateInfoHolder dateInfoHolder = (DateInfoHolder) view.getTag();
                 markSelectedDate(dateInfoHolder.getDate());
 
+                retrieveEventCount(dateInfoHolder);
                 // TODO - for testing
-                Toast.makeText(getApplicationContext(), dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), dateInfoHolder.getDate(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -166,6 +197,9 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         selectedDate = date;
         adapter.setSelectedDate(date);
         adapter.notifyDataSetChanged();
+
+        // todo: retrieve events
+        retrieveEvents(date);
     }
 
     /**
@@ -228,26 +262,38 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         {
             int leadingDayOfMonth = daysInPrevMonth - numOfLeadingDays + i;
 
-            adapter.addItem(new DateInfoHolder(String.valueOf(prevMonth), String.valueOf(leadingDayOfMonth),
-                    String.valueOf(yearOfPrevMonth), getApplicationContext().getResources()
-                    .getColor(R.color.nextAndPrevMonthDateColor)));
+            DateInfoHolder tempDateHolder = new DateInfoHolder(String.valueOf(prevMonth), String.valueOf(leadingDayOfMonth),
+                String.valueOf(yearOfPrevMonth), getApplicationContext().getResources()
+                .getColor(R.color.nextAndPrevMonthDateColor));
+
+            retrieveEventCount(tempDateHolder);
+
+            adapter.addItem(tempDateHolder);
         }
 
         //add info for each day of the current month to the cell info list
         for (int i = 1; i <= daysInCurrentMonth; i++)
         {
-            adapter.addItem(new DateInfoHolder(String.valueOf(month), String.valueOf(i),
+            DateInfoHolder tempDateHolder = new DateInfoHolder(String.valueOf(month), String.valueOf(i),
                     String.valueOf(year), getApplicationContext().getResources()
-                    .getColor(R.color.currentMonthDateColor)));
+                    .getColor(R.color.currentMonthDateColor));
+
+            retrieveEventCount(tempDateHolder);
+
+            adapter.addItem(tempDateHolder);
         }
 
         //add info for each day of the next month that trails out of the last week of the current
         //month to the cell info list
         for (int i = 0; i < adapter.getCount() % 7; i++)
         {
-            adapter.addItem(new DateInfoHolder(String.valueOf(nextMonth), String.valueOf(i + 1),
+            DateInfoHolder tempDateHolder = new DateInfoHolder(String.valueOf(nextMonth), String.valueOf(i + 1),
                     String.valueOf(yearOfNextMonth), getApplicationContext().getResources()
-                    .getColor(R.color.nextAndPrevMonthDateColor)));
+                    .getColor(R.color.nextAndPrevMonthDateColor));
+
+            retrieveEventCount(tempDateHolder);
+
+            adapter.addItem(tempDateHolder);
         }
     }
 
@@ -520,5 +566,255 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     {
         super.onResume();
         getSupportActionBar().setSelectedNavigationItem(0); // set spinner to 'Month'
+    }
+
+    private void retrieveEvents(final String date)
+    {
+        if (!hasInternetConnection())
+        {
+            Toast.makeText(getApplicationContext(), "No internet connectivity, could not retrieve events",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        else
+        {
+            RequestQueue queue = Volley.newRequestQueue(this);
+
+            Response.Listener<String> apiResponseListener = new Response.Listener<String>()
+            {
+                @Override
+                public void onResponse(String response)
+                {
+                    try
+                    {
+                        JSONObject jsonResponse = new JSONObject(response);
+                        boolean error = jsonResponse.getBoolean("error");
+                        if (error)
+                        {
+                            String errorMsg = jsonResponse.getString("errorMsg");
+                            Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                        }
+
+                        else
+                        {
+                            // todo: do something
+                            eventArray.clear();
+                            int eventCount = jsonResponse.getInt("eventCount");
+
+                            for (int i = 1; i <= eventCount; i++)
+                            {
+                                JSONObject event = (JSONObject)jsonResponse.get("event" + i);
+//                                eventMap.put("event" + i, event);
+                                eventArray.add(event);
+                            }
+
+//                            Toast.makeText(getApplicationContext(), eventArray.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    catch (JSONException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                    // TODO: for api response testing
+//                    Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+                }
+            };
+
+            Response.ErrorListener errorListener = new Response.ErrorListener()
+            {
+                @Override
+                public void onErrorResponse(VolleyError error)
+                {
+                    String errorMsg;
+                    if (error instanceof TimeoutError)
+                    {
+                        errorMsg = "Request timed out";
+                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                    else if (error instanceof NoConnectionError)
+                    {
+                        errorMsg = "Network is unreachable, please check your internet connection";
+                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                    else if (error instanceof ServerError)
+                    {
+                        errorMsg = "Server error";
+                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    }
+
+                    // TODO: for request error response testing
+//                    Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+                }
+            };
+
+            StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.day_planner_api_url),
+                    apiResponseListener, errorListener)
+            {
+                @Override
+                protected Map<String, String> getParams()
+                {
+                    Map<String, String> params = new HashMap<>();
+
+                    // project data
+                    params.put("tag", TAG);
+                    params.put("userID", userID);
+                    params.put("date", date);
+
+                    return params;
+                }
+            };
+
+            queue.add(strRequest);
+        }
+    }
+
+    /**
+     * Method: retrieveEventCount
+     * Retrieves the number of events for the specified date from the Day Planner database.
+     * @param dateHolder the holder of the specified date
+     */
+    private void retrieveEventCount(final DateInfoHolder dateHolder)
+    {
+        if (!hasInternetConnection())
+        {
+            Toast.makeText(getApplicationContext(), "No internet connectivity, could not retrieve events",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+        else
+        {
+            final RequestQueue queue = Volley.newRequestQueue(this);
+
+            Response.Listener<String> apiResponseListener = new Response.Listener<String>()
+            {
+                @Override
+                public void onResponse(String response)
+                {
+                    try
+                    {
+                        JSONObject jsonResponse = new JSONObject(response);
+                        boolean error = jsonResponse.getBoolean("error");
+                        if (error)
+                        {
+                            String errorMsg = jsonResponse.getString("errorMsg");
+                            Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                        }
+
+                        else
+                        {
+                            // todo: do something
+                            dateHolder.setEventCount(jsonResponse.getInt("eventCount"));
+
+                            if (dateHolder.getEventCount() > 0)
+                            {
+
+                                Toast.makeText(getApplicationContext(), "" + dateHolder.getEventCount(),
+                                        Toast.LENGTH_LONG).show();
+                            }
+                            else
+                            {
+//                                queue.getCache().remove(getString(R.string.day_planner_api_url));
+                            }
+                        }
+                    }
+                    catch (JSONException e)
+                    {
+                        e.printStackTrace();
+                    }
+
+                    // TODO: for api response testing
+//                    Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+                }
+            };
+
+            Response.ErrorListener errorListener = new Response.ErrorListener()
+            {
+                @Override
+                public void onErrorResponse(VolleyError error)
+                {
+                    String errorMsg;
+                    if (error instanceof TimeoutError)
+                    {
+                        errorMsg = "Request timed out";
+                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                    else if (error instanceof NoConnectionError)
+                    {
+                        errorMsg = "Network is unreachable, please check your internet connection";
+                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                    else if (error instanceof ServerError)
+                    {
+                        errorMsg = "Server error";
+                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    }
+
+                    // TODO: for request error response testing
+//                    Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+                }
+            };
+
+            StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.day_planner_api_url),
+                    apiResponseListener, errorListener)
+            {
+                @Override
+                protected Map<String, String> getParams()
+                {
+                    Map<String, String> params = new HashMap<>();
+
+                    // project data
+                    params.put("tag", TAG);
+                    params.put("userID", userID);
+                    params.put("date", dateHolder.getDate());
+
+                    return params;
+                }
+            };
+
+            if (queue.getCache().get(getString(R.string.day_planner_api_url)) != null)
+            {
+
+                String cachedResponse = new String(queue.getCache().get(getString(R.string.day_planner_api_url)).data);
+                Toast.makeText(getApplicationContext(), cachedResponse, Toast.LENGTH_LONG).show();
+
+                try
+                {
+                    JSONObject jsonResponse = new JSONObject(cachedResponse);
+                    dateHolder.setEventCount(jsonResponse.getInt("eventCount"));
+
+                    if (dateHolder.getEventCount() > 0)
+                    {
+
+                        Toast.makeText(getApplicationContext(), "" + dateHolder.getEventCount(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+            else
+            {
+                queue.add(strRequest);
+            }
+        }
+    }
+
+    /**
+     * Method: hasInternetConnection
+     * Checks to see if the mobile device has an active internet connection.
+     * @return isConnected the boolean result of the verification
+     */
+    private boolean hasInternetConnection()
+    {
+        ConnectivityManager connManager = (ConnectivityManager)getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = connManager.getActiveNetworkInfo();
+
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }
