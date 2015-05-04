@@ -40,6 +40,11 @@ public class EventListAdapter extends BaseAdapter
         this.projectList = projectList;
     }
 
+    public void clearProjects()
+    {
+        projectList.clear();
+    }
+
     @Override
     public int getCount()
     {
