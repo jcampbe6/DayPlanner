@@ -153,6 +153,10 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         eventsListView = (ListView) findViewById(R.id.eventListView);
         eventListAdapter = new EventListAdapter(getApplicationContext());
+        if (selectedDate == null)
+        {
+            Toast.makeText(getApplicationContext(), "Selected date is null", Toast.LENGTH_SHORT).show();
+        }
         fillEventListData(selectedDate);
         eventListAdapter.notifyDataSetChanged();
         eventsListView.setAdapter(eventListAdapter);
@@ -195,9 +199,6 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         selectedDate = date;
         adapter.setSelectedDate(date);
         adapter.notifyDataSetChanged();
-
-        // todo: retrieve events
-//        retrieveEvents(date);
     }
 
     private void fillEventListData(String date)
@@ -344,7 +345,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         {
             setCalendarToCurrentDate();
             updateCalendarUI();
-            fillEventListData(currentDate);
+            markSelectedDate(currentDate);
+            fillEventListData(selectedDate);
             eventListAdapter.notifyDataSetChanged();
         }
 
@@ -575,8 +577,16 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     }
 
     @Override
+    protected  void onPause()
+    {
+        projectDAO.close();
+        super.onPause();
+    }
+
+    @Override
     protected void onResume()
     {
+        projectDAO.open();
         super.onResume();
         getSupportActionBar().setSelectedNavigationItem(0); // set spinner to 'Month'
 
