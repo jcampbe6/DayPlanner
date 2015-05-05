@@ -88,22 +88,18 @@ public class ProjectDAO
     public List<Project> getAllProjectsByDate(String date)
     {
         List<Project> projectList = new ArrayList<>();
+        Cursor cursor = database.query(dbHandler.TABLE_PROJECT, allColumns, dbHandler.COLUMN_PROJECT_START_DATE +
+                " = ?", new String[]{date}, null, null, null);
+        cursor.moveToFirst();
 
-        if (date != null)
+        while (!cursor.isAfterLast())
         {
-            Cursor cursor = database.query(dbHandler.TABLE_PROJECT, allColumns, dbHandler.COLUMN_PROJECT_START_DATE +
-                    " = ?", new String[]{date}, null, null, null);
-            cursor.moveToFirst();
-
-            while (!cursor.isAfterLast())
-            {
-                Project project = cursorToProject(cursor);
-                projectList.add(project);
-                cursor.moveToNext();
-            }
-
-            cursor.close();
+            Project project = cursorToProject(cursor);
+            projectList.add(project);
+            cursor.moveToNext();
         }
+
+        cursor.close();
 
         return projectList;
     }

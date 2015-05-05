@@ -122,6 +122,12 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         if (savedInstanceState != null && savedInstanceState.containsKey(STATE_SELECTED_DATE))
         {
             adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
+
+            /*
+            sometimes 'savedInstanceState.getString(STATE_SELECTED_DATE)' is null when it is saved
+            in the onSaveInstanceState() method, so make sure to check for null on 'selectedDate' on
+            device orientation change if your code depends on 'selectedDate'
+             */
             markSelectedDate(savedInstanceState.getString(STATE_SELECTED_DATE));
         }
 
@@ -153,12 +159,13 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
         eventsListView = (ListView) findViewById(R.id.eventListView);
         eventListAdapter = new EventListAdapter(getApplicationContext());
-        if (selectedDate == null)
+
+        if (selectedDate != null)
         {
-            Toast.makeText(getApplicationContext(), "Selected date is null", Toast.LENGTH_SHORT).show();
+            fillEventListData(selectedDate);
+            eventListAdapter.notifyDataSetChanged();
         }
-        fillEventListData(selectedDate);
-        eventListAdapter.notifyDataSetChanged();
+
         eventsListView.setAdapter(eventListAdapter);
     }
 
@@ -203,8 +210,11 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
     private void fillEventListData(String date)
     {
-        projectList = projectDAO.getAllProjectsByDate(date);
-        eventListAdapter.addProjectList(projectList);
+        if (date != null)
+        {
+            projectList = projectDAO.getAllProjectsByDate(date);
+            eventListAdapter.addProjectList(projectList);
+        }
     }
 
     /**
@@ -346,6 +356,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
             setCalendarToCurrentDate();
             updateCalendarUI();
             markSelectedDate(currentDate);
+            adapter.setSelectedDate(currentDate);
             fillEventListData(selectedDate);
             eventListAdapter.notifyDataSetChanged();
         }
@@ -449,6 +460,13 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         instanceState.putInt(STATE_SELECTED_NAVIGATION_ITEM, getSupportActionBar().getSelectedNavigationIndex());
         instanceState.putInt(STATE_MONTH, month);
         instanceState.putInt(STATE_YEAR, year);
+
+        /*
+        sometimes 'adapter.getSelectedDate()' is null due to 'adapter.setSelectedDate()' not being
+        set in the 'updateCalendarUI()' method when switching between months in the calendar, so
+        make sure to check for null on 'selectedDate' on device orientation change if your code
+        depends on 'selectedDate'
+         */
         instanceState.putString(STATE_SELECTED_DATE, adapter.getSelectedDate());
     }
 
