@@ -10,7 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
- * Class: ProjectTask
+ * Class: ProjectTaskInfoHolder
  * @author Joshua Campbell
  * @version 1.0
  * Course: ITEC 4860 Spring 2015
@@ -20,7 +20,7 @@ import android.widget.TextView;
  * 
  * Purpose: 
  */
-public class ProjectTask 
+public class ProjectTaskInfoHolder
 {
     private EditText taskNameEditText;
     private TextView dueDateTextView;
@@ -31,8 +31,8 @@ public class ProjectTask
     private int taskDueDay;
     private int taskDueYear;
 
-    public ProjectTask(EditText taskName, TextView dueDate, CheckBox completedStatus,
-                       RelativeLayout errorMsgContainer, TextView errorMsg)
+    public ProjectTaskInfoHolder(EditText taskName, TextView dueDate, CheckBox completedStatus,
+                                 RelativeLayout errorMsgContainer, TextView errorMsg)
     {
         taskNameEditText = taskName;
         dueDateTextView = dueDate;

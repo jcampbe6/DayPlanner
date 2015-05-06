@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class: TaskDAO
  * @author Joshua Campbell
@@ -80,6 +83,30 @@ public class TaskDAO
         }
 
         return cursorToTask(cursor);
+    }
+
+    public List<Task> getAllTasksByProjectId(long id)
+    {
+        List<Task> taskList = new ArrayList<>();
+        Cursor cursor = database.query(dbHandler.TABLE_TASK, allColumns, dbHandler.COLUMN_TASK_PROJECT_ID +
+                " = ?", new String[]{String.valueOf(id)}, null, null, null);
+        cursor.moveToFirst();
+
+        while (!cursor.isAfterLast())
+        {
+            Task task = cursorToTask(cursor);
+            taskList.add(task);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+
+        return taskList;
+    }
+
+    public boolean deleteAllTasksByProjectId(long id)
+    {
+        return database.delete(dbHandler.TABLE_TASK, dbHandler.COLUMN_TASK_PROJECT_ID + "=" + id, null) > 0;
     }
 
     protected Task cursorToTask(Cursor cursor)

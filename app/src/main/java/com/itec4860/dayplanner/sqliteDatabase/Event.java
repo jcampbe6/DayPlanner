@@ -5,13 +5,13 @@ package com.itec4860.dayplanner.sqliteDatabase;
  * @author Joshua Campbell
  * @version 1.0
  * Course: ITEC 4860 Spring 2015
- * Written: April 9, 2015.
+ * Written: May 4, 2015.
  *
  * This class...
  *
  * Purpose:
  */
-public class Event
+public abstract class Event
 {
     private long eventID;
     private String title;
@@ -19,7 +19,7 @@ public class Event
 
     public Event(){}
 
-    public Event(int eventID, String title, String type)
+    public Event(long eventID, String title, String type)
     {
         this.eventID = eventID;
         this.title = title;

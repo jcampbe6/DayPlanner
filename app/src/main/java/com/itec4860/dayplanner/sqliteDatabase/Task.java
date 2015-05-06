@@ -5,7 +5,7 @@ package com.itec4860.dayplanner.sqliteDatabase;
  * @author Joshua Campbell
  * @version 1.0
  * Course: ITEC 4860 Spring 2015
- * Written: April 9, 2015.
+ * Written: May 4, 2015.
  *
  * This class
  *
@@ -78,5 +78,10 @@ public class Task
     public void setCompleted(int completed)
     {
         this.completed = completed;
+    }
+
+    public String toString()
+    {
+        return title;
     }
 }

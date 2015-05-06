@@ -11,32 +11,21 @@ package com.itec4860.dayplanner.sqliteDatabase;
  * 
  * Purpose: 
  */
-public class Project 
+public class Project extends Event
 {
-    private long projectID;
     private String startDate;
     private String endDate;
     private int hasTask;
 
     public Project(){}
 
-    public Project(long eventID, String startDate, String endDate, int hasTask)
+    public Project(long eventID, String title, String startDate, String endDate, int hasTask)
     {
-        this.projectID = eventID;
+        super(eventID, title, "project");
+
         this.startDate = startDate;
         this.endDate = endDate;
         this.hasTask = hasTask;
-
-    }
-
-    public long getProjectID()
-    {
-        return projectID;
-    }
-
-    public void setProjectID(long projectID)
-    {
-        this.projectID = projectID;
     }
 
     public String getStartDate()
