@@ -34,8 +34,6 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.itec4860.dayplanner.sqliteDatabase.Event;
-import com.itec4860.dayplanner.sqliteDatabase.EventDAO;
 import com.itec4860.dayplanner.sqliteDatabase.Project;
 import com.itec4860.dayplanner.sqliteDatabase.ProjectDAO;
 import com.itec4860.dayplanner.sqliteDatabase.Task;
@@ -86,7 +84,7 @@ public class EventViewActivity extends Activity
     private String projectName;
     private static String projectStartDate;
     private static String projectDueDate;
-    private ArrayList<ProjectTask> taskList;
+    private ArrayList<ProjectTaskInfoHolder> taskList;
 
     // variables for project date picker
     private static int projStartMonth;
@@ -284,7 +282,8 @@ public class EventViewActivity extends Activity
         TextView dueDateErrorMsgTextView = (TextView) taskItemRow.findViewById(R.id.taskDueDateErrorMsg);
 
         // adds task to task list array
-        final ProjectTask newTask = new ProjectTask(taskNameEditText, taskDueDateTextView, taskCompletedStatusBox,
+        final ProjectTaskInfoHolder
+                newTask = new ProjectTaskInfoHolder(taskNameEditText, taskDueDateTextView, taskCompletedStatusBox,
                 errorMsgContainer, dueDateErrorMsgTextView);
         newTask.setMonthDayYear(projStartMonth, projStartDay, projStartYear);
         taskList.add(newTask);
@@ -446,7 +445,7 @@ public class EventViewActivity extends Activity
      * @param task the task to validate
      * @return result the result of the validation
      */
-    private boolean validateTaskName(ProjectTask task)
+    private boolean validateTaskName(ProjectTaskInfoHolder task)
     {
         boolean result = true;
 
@@ -466,7 +465,7 @@ public class EventViewActivity extends Activity
      * @param task the task to validate
      * @return result the result of the validation
      */
-    private boolean validateTaskDueDate(ProjectTask task)
+    private boolean validateTaskDueDate(ProjectTaskInfoHolder task)
     {
         boolean result = true;
 
@@ -500,145 +499,143 @@ public class EventViewActivity extends Activity
         // save event, project and task data in SQLite database
         if (validateProjectFields())
         {
-            // save event in sqlite event table
-            EventDAO eventDAO = new EventDAO(getApplicationContext());
-            Event newEvent = eventDAO.createEvent(projectName, eventType);
-
             // save project in sqlite project table
             int hasTask = 0;
             if(taskList.size() > 0)
             {
                 hasTask = 1;
             }
+
             ProjectDAO projectDAO = new ProjectDAO(getApplicationContext());
-            Project project = projectDAO.createProject(newEvent.getEventID(), projectStartDate, projectDueDate,
+            Project project = projectDAO.createProject(projectName, projectStartDate, projectDueDate,
                     hasTask);
 
             // save tasks in sqlite task table
             if (taskList.size() > 0)
             {
-                for (ProjectTask task : taskList)
+                for (ProjectTaskInfoHolder task : taskList)
                 {
                     TaskDAO taskDAO = new TaskDAO(getApplicationContext());
-                    Task newTask = taskDAO.createTask(project.getProjectID(), task.getTaskName(),
+                    Task newTask = taskDAO.createTask(project.getEventID(), task.getTaskName(),
                             task.getDueDate(), task.isTaskCompleted());
                 }
             }
-        }
 
-        if (!hasInternetConnection())
-        {
-            Toast.makeText(getApplicationContext(), "No internet connectivity", Toast.LENGTH_SHORT).show();
-        }
-
-        else if (validateProjectFields())
-        {
-            RequestQueue queue = Volley.newRequestQueue(this);
-            displaySaveEventProgressDialog();
-
-            Response.Listener<String> apiResponseListener = new Response.Listener<String>()
+            if (!hasInternetConnection())
             {
-                @Override
-                public void onResponse(String response)
+                Toast.makeText(getApplicationContext(), "No internet connectivity, data only saved locally",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            else
+            {
+                RequestQueue queue = Volley.newRequestQueue(this);
+                displaySaveEventProgressDialog();
+
+                Response.Listener<String> apiResponseListener = new Response.Listener<String>()
                 {
-                    dismissSaveEventProgressDialog();
-                    try
+                    @Override
+                    public void onResponse(String response)
                     {
-                        JSONObject jsonResponse = new JSONObject(response);
-                        boolean error = jsonResponse.getBoolean("error");
-                        if (error)
+                        dismissSaveEventProgressDialog();
+                        try
                         {
-                            String errorMsg = jsonResponse.getString("errorMsg");
+                            JSONObject jsonResponse = new JSONObject(response);
+                            boolean error = jsonResponse.getBoolean("error");
+                            if (error)
+                            {
+                                String errorMsg = jsonResponse.getString("errorMsg");
+                                Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                            }
+
+                            else
+                            {
+                                // finish event activity and return to calendar view
+                                finish();
+                            }
+                        }
+                        catch (JSONException e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                        // TODO: for api response testing
+//                    Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+                    }
+                };
+
+                Response.ErrorListener errorListener = new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        String errorMsg;
+                        if (error instanceof TimeoutError)
+                        {
+                            errorMsg = "Request timed out";
+                            Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                        else if (error instanceof NoConnectionError)
+                        {
+                            errorMsg = "Network is unreachable, please check your internet connection";
+                            Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                        else if (error instanceof ServerError)
+                        {
+                            errorMsg = "Server error";
                             Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
                         }
 
-                        else
-                        {
-                            // finish event activity and return to calendar view
-                            finish();
-                        }
-                    }
-                    catch (JSONException e)
-                    {
-                        e.printStackTrace();
-                    }
+                        dismissSaveEventProgressDialog();
 
-                    // TODO: for api response testing
-//                    Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-                }
-            };
-
-            Response.ErrorListener errorListener = new Response.ErrorListener()
-            {
-                @Override
-                public void onErrorResponse(VolleyError error)
-                {
-                    String errorMsg;
-                    if (error instanceof TimeoutError)
-                    {
-                        errorMsg = "Request timed out";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                    else if (error instanceof NoConnectionError)
-                    {
-                        errorMsg = "Network is unreachable, please check your internet connection";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                    else if (error instanceof ServerError)
-                    {
-                        errorMsg = "Server error";
-                        Toast.makeText(getApplicationContext(), errorMsg, Toast.LENGTH_LONG).show();
-                    }
-
-                    dismissSaveEventProgressDialog();
-
-                    // TODO: for request error response testing
+                        // TODO: for request error response testing
 //                    Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
-                }
-            };
+                    }
+                };
 
-            StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.day_planner_api_url),
-                    apiResponseListener, errorListener)
-            {
-                @Override
-                protected Map<String, String> getParams()
+                StringRequest strRequest = new StringRequest(Request.Method.POST, getString(R.string.day_planner_api_url),
+                        apiResponseListener, errorListener)
                 {
-                    Map<String, String> params = new HashMap<>();
-
-                    // project data
-                    params.put("tag", TAG);
-
-                    params.put("userID", userID);
-                    params.put("type", eventType);
-                    params.put("title", projectName);
-                    params.put("start date", projectStartDate);
-                    params.put("end date", projectDueDate);
-
-                    // project task data
-                    if (taskList.size() > 0)
+                    @Override
+                    protected Map<String, String> getParams()
                     {
-                        Map<String, Map> taskMap = new HashMap<>();
-                        Map<String, String> task;
+                        Map<String, String> params = new HashMap<>();
 
-                        for (int i = 0; i < taskList.size(); i++)
+                        // project data
+                        params.put("tag", TAG);
+
+                        params.put("userID", userID);
+                        params.put("type", eventType);
+                        params.put("title", projectName);
+                        params.put("start date", projectStartDate);
+                        params.put("end date", projectDueDate);
+
+                        // project task data
+                        if (taskList.size() > 0)
                         {
-                            String key = "task";
-                            task = new HashMap<>();
-                            task.put("task name", taskList.get(i).getTaskName());
-                            task.put("task due date", taskList.get(i).getDueDate());
-                            task.put("task completed status", "" + taskList.get(i).isTaskCompleted());
-                            taskMap.put(key + (i + 1), task);
+                            Map<String, Map> taskMap = new HashMap<>();
+                            Map<String, String> task;
+
+                            for (int i = 0; i < taskList.size(); i++)
+                            {
+                                String key = "task";
+                                task = new HashMap<>();
+                                task.put("task name", taskList.get(i).getTaskName());
+                                task.put("task due date", taskList.get(i).getDueDate());
+                                task.put("task completed status", "" + taskList.get(i).isTaskCompleted());
+                                taskMap.put(key + (i + 1), task);
+                            }
+
+                            JSONObject taskJsonObj = new JSONObject(taskMap);
+                            params.put("tasks", taskJsonObj.toString());
                         }
 
-                        JSONObject taskJsonObj = new JSONObject(taskMap);
-                        params.put("tasks", taskJsonObj.toString());
+                        return params;
                     }
+                };
 
-                    return params;
-                }
-            };
-
-            queue.add(strRequest);
+                queue.add(strRequest);
+            }
         }
     }
 

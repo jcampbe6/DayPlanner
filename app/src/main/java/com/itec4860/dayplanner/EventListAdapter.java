@@ -8,7 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.itec4860.dayplanner.sqliteDatabase.Event;
-import com.itec4860.dayplanner.sqliteDatabase.EventDAO;
 import com.itec4860.dayplanner.sqliteDatabase.Project;
 
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ import java.util.List;
  */
 public class EventListAdapter extends BaseAdapter
 {
-    private List<Project> projectList = new ArrayList<>();
+    private List<Event> projectList = new ArrayList<>();
     private Context context;
 
     public EventListAdapter(Context context)
@@ -35,7 +34,7 @@ public class EventListAdapter extends BaseAdapter
         this.context = context;
     }
 
-    public void addProjectList(List<Project> projectList)
+    public void addProjectList(List<Event> projectList)
     {
         this.projectList = projectList;
     }
@@ -74,17 +73,18 @@ public class EventListAdapter extends BaseAdapter
             listItem = inflater.inflate(R.layout.project_calendar_list_item, parent, false);
         }
 
-        Project project = (Project) getItem(position);
-        EventDAO eventDAO = new EventDAO(context);
-        Event event = eventDAO.getEventById(project.getProjectID());
+        if (getItem(position).getClass().equals(Project.class))
+        {
+            Project project = (Project) getItem(position);
 
-        TextView projectTitleTextView = (TextView) listItem.findViewById(R.id.projectListItemTitle);
-        TextView projectStartDateTextView = (TextView) listItem.findViewById(R.id.projectListItemStartDate);
-        TextView projectDueDateTextView = (TextView) listItem.findViewById(R.id.projectListItemDueDate);
+            TextView projectTitleTextView = (TextView) listItem.findViewById(R.id.projectListItemTitle);
+            TextView projectStartDateTextView = (TextView) listItem.findViewById(R.id.projectListItemStartDate);
+            TextView projectDueDateTextView = (TextView) listItem.findViewById(R.id.projectListItemDueDate);
 
-        projectTitleTextView.setText(event.getTitle());
-        projectStartDateTextView.setText(project.getStartDate());
-        projectDueDateTextView.setText(project.getEndDate());
+            projectTitleTextView.setText(project.getTitle());
+            projectStartDateTextView.setText(project.getStartDate());
+            projectDueDateTextView.setText(project.getEndDate());
+        }
 
         return listItem;
     }

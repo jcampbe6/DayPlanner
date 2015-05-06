@@ -1,8 +1,10 @@
 package com.itec4860.dayplanner;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
@@ -10,12 +12,14 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -23,10 +27,14 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.itec4860.dayplanner.sqliteDatabase.Event;
 import com.itec4860.dayplanner.sqliteDatabase.Project;
 import com.itec4860.dayplanner.sqliteDatabase.ProjectDAO;
+import com.itec4860.dayplanner.sqliteDatabase.Task;
+import com.itec4860.dayplanner.sqliteDatabase.TaskDAO;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
@@ -65,7 +73,7 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     private ListView eventsListView;
     private ProjectDAO projectDAO;
     private EventListAdapter eventListAdapter;
-    private List<Project> projectList;
+    private List<Event> eventList;
 
     private final String[] MONTHS = {"January", "February", "March", "April", "May", "June", "July",
             "August", "September", "October", "November", "December"};
@@ -167,6 +175,114 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
         }
 
         eventsListView.setAdapter(eventListAdapter);
+
+        eventsListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                TaskDAO taskDAO = new TaskDAO(getApplicationContext());
+                Project proj = (Project) eventListAdapter.getItem(position);
+
+                if (proj.hasTask() == 1)
+                {
+                    List<Task> taskList = taskDAO.getAllTasksByProjectId(proj.getEventID());
+                    String taskNotification = "Tasks\n";
+
+                    for (int i = 0; i < taskList.size(); i++)
+                    {
+                        if (i != taskList.size() - 1)
+                        {
+                            taskNotification += "(" + (i + 1) + ") " + taskList.get(i).toString() + "\n";
+                        }
+
+                        else
+                        {
+                            taskNotification += "(" + (i + 1) + ") " + taskList.get(i).toString();
+                        }
+                    }
+
+                    Toast.makeText(getApplicationContext(), taskNotification, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        eventsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
+        {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                final boolean result = false;
+                final Project proj = (Project) eventListAdapter.getItem(position);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(CalendarActivity.this,
+                        AlertDialog.THEME_HOLO_DARK);
+
+                // custom title for dialog
+                TextView deleteDialogTitle = new TextView(getApplicationContext());
+                deleteDialogTitle.setText("Delete Event?");
+                deleteDialogTitle.setPadding(10, 10, 10, 10);
+                deleteDialogTitle.setTextColor(Color.parseColor("#FF33b5e5"));
+                deleteDialogTitle.setSingleLine(false);
+                deleteDialogTitle.setTextSize(20);
+
+                LayoutInflater inflater = getLayoutInflater();
+
+                View deleteDialogView = inflater.inflate(R.layout.confirm_delete_event_dialog_layout,
+                        parent, false);
+                builder.setCustomTitle(deleteDialogTitle).setView(deleteDialogView);
+                final AlertDialog deleteDialog = builder.create();
+
+                Button deleteButton = (Button) deleteDialogView.findViewById(R.id.delete_button);
+                Button cancelButton = (Button) deleteDialogView.findViewById(R.id.cancel_button);
+
+                deleteButton.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        ProjectDAO projectDAO = new ProjectDAO(getApplicationContext());
+
+                        boolean deleteProjectResult = projectDAO.deleteProjectById(proj.getEventID());
+
+                        if (deleteProjectResult)
+                        {
+                            if (proj.hasTask() == 1)
+                            {
+                                TaskDAO taskDAO = new TaskDAO(getApplicationContext());
+                                taskDAO.deleteAllTasksByProjectId(proj.getEventID());
+                            }
+
+                            int eventCount = retrieveEventCountByDate(selectedDate);
+                            DateInfoHolder dateInfoHolder = adapter.getItem(adapter.getSelectedItemPosition());
+                            dateInfoHolder.setEventCount(eventCount);
+                            adapter = new CalendarGridAdapter(getApplicationContext(), currentDate);
+                            calendarGrid.setAdapter(adapter);
+                            fillCalendar();
+                            markSelectedDate(selectedDate);
+                            adapter.notifyDataSetChanged();
+                            fillEventListData(selectedDate);
+                            eventListAdapter.notifyDataSetChanged();
+                        }
+
+                        deleteDialog.dismiss();
+                    }
+                });
+
+                cancelButton.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        deleteDialog.dismiss();
+                    }
+                });
+
+                deleteDialog.show();
+
+                return false;
+            }
+        });
     }
 
     /**
@@ -212,8 +328,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
     {
         if (date != null)
         {
-            projectList = projectDAO.getAllProjectsByDate(date);
-            eventListAdapter.addProjectList(projectList);
+            eventList = projectDAO.getAllProjectsByDate(date);
+            eventListAdapter.addProjectList(eventList);
         }
     }
 
@@ -313,6 +429,8 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
 
             adapter.addItem(tempDateHolder);
         }
+
+        adapter.setSelectedItemPosition(selectedDate);
     }
 
     /**

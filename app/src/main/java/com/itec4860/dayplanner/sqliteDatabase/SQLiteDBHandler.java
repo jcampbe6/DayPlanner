@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * @author Joshua Campbell
  * @version 1.0
  * Course: ITEC 4860 Spring 2015
- * Written: April 10, 2015
+ * Written: May 4, 2015
  * 
  * This class...
  * 
@@ -17,15 +17,10 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SQLiteDBHandler extends SQLiteOpenHelper
 {
-    // columns of the event table
-    public static final String TABLE_EVENT = "event";
-    public static final String COLUMN_EVENT_ID = "event_id";
-    public static final String COLUMN_EVENT_TITLE = "title";
-    public static final String COLUMN_EVENT_TYPE = "type";
-
     // columns of the project table
     public static final String TABLE_PROJECT = "project";
     public static final String COLUMN_PROJECT_ID = "event_id";
+    public static final String COLUMN_PROJECT_TITLE = "title";
     public static final String COLUMN_PROJECT_START_DATE = "start_date";
     public static final String COLUMN_PROJECT_END_DATE = "end_date";
     public static final String COLUMN_PROJECT_HAS_TASK = "has_task";
@@ -41,16 +36,10 @@ public class SQLiteDBHandler extends SQLiteOpenHelper
     private static final String DATABASE_NAME = "dayplanner";
     private static final int DATABASE_VERSION = 1;
 
-    // SQL statement of the event table creation
-    private static final String SQL_CREATE_TABLE_EVENT = "CREATE TABLE " + TABLE_EVENT + "("
-            + COLUMN_EVENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-            + COLUMN_EVENT_TITLE + " TEXT NOT NULL, "
-            + COLUMN_EVENT_TYPE + " TEXT NOT NULL "
-            +");";
-
     // SQL statement of the project table creation
     private static final String SQL_CREATE_TABLE_PROJECT = "CREATE TABLE " + TABLE_PROJECT + "("
-            + COLUMN_PROJECT_ID + " INTEGER PRIMARY KEY, "
+            + COLUMN_PROJECT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + COLUMN_PROJECT_TITLE + " TEXT NOT NULL, "
             + COLUMN_PROJECT_START_DATE + " TEXT NOT NULL, "
             + COLUMN_PROJECT_END_DATE + " TEXT NOT NULL, "
             + COLUMN_PROJECT_HAS_TASK + " INTEGER NOT NULL "
@@ -73,7 +62,6 @@ public class SQLiteDBHandler extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        db.execSQL(SQL_CREATE_TABLE_EVENT);
         db.execSQL(SQL_CREATE_TABLE_PROJECT);
         db.execSQL(SQL_CREATE_TABLE_TASK);
     }
@@ -84,7 +72,6 @@ public class SQLiteDBHandler extends SQLiteOpenHelper
         // clear all data on database upgrade
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASK);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROJECT);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENT);
 
         // recreate the tables
         onCreate(db);

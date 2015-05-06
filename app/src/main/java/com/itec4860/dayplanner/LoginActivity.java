@@ -136,19 +136,17 @@ public class LoginActivity extends Activity
 
                         else
                         {
-                            // TODO: store user info in SQLite database -- must create database first
-
-                            // store user info in preferences
+                            // store user info and registration status in preferences
                             String userID = jsonResponse.getString("userID");
                             String username = jsonResponse.getString("username");
-
-                            // sets the user's registration status within the application to 'true'
                             SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings", MODE_PRIVATE);
                             SharedPreferences.Editor settingsEditor = dayPlannerSettings.edit();
                             settingsEditor.putBoolean("isUserRegistered", true);
                             settingsEditor.putString("username", username);
                             settingsEditor.putString("userID", userID);
                             settingsEditor.apply();
+
+                            // TODO: retrieve all user events from online database and store in SQLite database
 
                             Intent viewCalendarIntent = new Intent(context, CalendarActivity.class);
                             startActivity(viewCalendarIntent);

@@ -32,6 +32,7 @@ public class CalendarGridAdapter extends BaseAdapter
 
     private String todaysDate;
     private String selectedDate;
+    private int selectedItemPosition;
 
     /**
      * Constructor: CalendarGridAdapter
@@ -181,5 +182,22 @@ public class CalendarGridAdapter extends BaseAdapter
     public void setSelectedDate(String selectedDate)
     {
         this.selectedDate = selectedDate;
+        setSelectedItemPosition(this.selectedDate);
+    }
+
+    public void setSelectedItemPosition(String date)
+    {
+        for (int i = 0; i < GRID_CELL_INFO_LIST.size(); i++)
+        {
+            if (getItem(i).getDate().equalsIgnoreCase(date))
+            {
+                selectedItemPosition = i;
+            }
+        }
+    }
+
+    public int getSelectedItemPosition()
+    {
+        return selectedItemPosition;
     }
 }

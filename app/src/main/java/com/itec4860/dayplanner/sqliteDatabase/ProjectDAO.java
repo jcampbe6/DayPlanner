@@ -26,7 +26,7 @@ public class ProjectDAO
     private SQLiteDatabase database;
     private SQLiteDBHandler dbHandler;
     private Context context;
-    private String[] allColumns = {dbHandler.COLUMN_PROJECT_ID, dbHandler.COLUMN_PROJECT_START_DATE,
+    private String[] allColumns = {dbHandler.COLUMN_PROJECT_ID, dbHandler.COLUMN_PROJECT_TITLE, dbHandler.COLUMN_PROJECT_START_DATE,
             dbHandler.COLUMN_PROJECT_END_DATE, dbHandler.COLUMN_PROJECT_HAS_TASK};
 
     public ProjectDAO(Context context)
@@ -55,16 +55,16 @@ public class ProjectDAO
         dbHandler.close();
     }
 
-    public Project createProject(long id, String startDate, String endDate, int hasTask)
+    public Project createProject(String title, String startDate, String endDate, int hasTask)
     {
         ContentValues values = new ContentValues();
-        values.put(dbHandler.COLUMN_PROJECT_ID, id);
+        values.put(dbHandler.COLUMN_PROJECT_TITLE, title);
         values.put(dbHandler.COLUMN_PROJECT_START_DATE, startDate);
         values.put(dbHandler.COLUMN_PROJECT_END_DATE, endDate);
         values.put(dbHandler.COLUMN_PROJECT_HAS_TASK, hasTask);
-        database.insert(dbHandler.TABLE_PROJECT, null, values);
+        long insertId = database.insert(dbHandler.TABLE_PROJECT, null, values);
         Cursor cursor = database.query(dbHandler.TABLE_PROJECT, allColumns, dbHandler.COLUMN_PROJECT_ID +
-                " = " + id, null, null, null, null);
+                " = " + insertId, null, null, null, null);
         cursor.moveToFirst();
         Project newProject = cursorToProject(cursor);
         cursor.close();
@@ -85,9 +85,9 @@ public class ProjectDAO
         return cursorToProject(cursor);
     }
 
-    public List<Project> getAllProjectsByDate(String date)
+    public List<Event> getAllProjectsByDate(String date)
     {
-        List<Project> projectList = new ArrayList<>();
+        List<Event> projectList = new ArrayList<>();
         Cursor cursor = database.query(dbHandler.TABLE_PROJECT, allColumns, dbHandler.COLUMN_PROJECT_START_DATE +
                 " = ?", new String[]{date}, null, null, null);
         cursor.moveToFirst();
@@ -123,19 +123,19 @@ public class ProjectDAO
         return projectList.size();
     }
 
-    public Cursor getCursorForAllProjectsByDate(String date)
+    public boolean deleteProjectById(long id)
     {
-        return database.query(dbHandler.TABLE_PROJECT, allColumns, dbHandler.COLUMN_PROJECT_START_DATE +
-                " = ?", new String[]{date}, null, null, null);
+        return database.delete(dbHandler.TABLE_PROJECT, dbHandler.COLUMN_PROJECT_ID + "=" + id, null) > 0;
     }
 
     protected Project cursorToProject(Cursor cursor)
     {
         Project project = new Project();
-        project.setProjectID(cursor.getLong(0));
-        project.setStartDate(cursor.getString(1));
-        project.setEndDate(cursor.getString(2));
-        project.setHasTask(cursor.getInt(3));
+        project.setEventID(cursor.getLong(0));
+        project.setTitle(cursor.getString(1));
+        project.setStartDate(cursor.getString(2));
+        project.setEndDate(cursor.getString(3));
+        project.setHasTask(cursor.getInt(4));
 
         return project;
     }
