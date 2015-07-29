@@ -17,6 +17,7 @@
     <!-- Additional Test Colors-->
     <color name="brown">#4B3A2D</color>
     <color name="lt_brown">#5d4e42</color>
+    <color name="mint">#99ffcc</color>
     <color name="green">#20B035</color>
     <color name="grey">#aaaaaa</color>
 </resources>

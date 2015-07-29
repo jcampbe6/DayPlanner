@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +24,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +36,6 @@ import com.itec4860.dayplanner.sqliteDatabase.Task;
 import com.itec4860.dayplanner.sqliteDatabase.TaskDAO;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
@@ -477,6 +478,39 @@ public class CalendarActivity extends ActionBarActivity implements ActionBar.OnN
             adapter.setSelectedDate(currentDate);
             fillEventListData(selectedDate);
             eventListAdapter.notifyDataSetChanged();
+        }
+
+        if (id == R.id.displayUserInfo)
+        {
+            SharedPreferences dayPlannerSettings = getSharedPreferences("dayPlannerSettings",
+                    MODE_PRIVATE);
+            String username = dayPlannerSettings.getString("username", "Username not set");
+            String userID = dayPlannerSettings.getString("userID", "User ID not set");
+
+            LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+            View popupLayout = layoutInflater.inflate(R.layout.user_info_popup_layout, null);
+
+            final PopupWindow popup = new PopupWindow(popupLayout,
+                    android.app.ActionBar.LayoutParams.WRAP_CONTENT,
+                    android.app.ActionBar.LayoutParams.WRAP_CONTENT);
+            popup.setFocusable(true);
+            popup.showAtLocation(findViewById(R.id.calendarMonthLayout), Gravity.CENTER, 0, 0);
+
+            TextView usernameTextView = (TextView) popupLayout.findViewById(R.id.popupUsername);
+            usernameTextView.setText("Username: " + username);
+
+            TextView userIdTextView = (TextView) popupLayout.findViewById(R.id.popupUserID);
+            userIdTextView.setText("User ID: " + userID);
+
+            Button closeButton = (Button) popupLayout.findViewById(R.id.okButton);
+            closeButton.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    popup.dismiss();
+                }
+
+            });
         }
 
         return super.onOptionsItemSelected(item);
