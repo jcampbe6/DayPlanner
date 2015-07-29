@@ -16,4 +16,8 @@
           android:title="Display national holidays"
           app:showAsAction="never" />
 
+    <item android:id="@+id/displayUserInfo"
+          android:title="User Info"
+          app:showAsAction="never" />
+
 </menu>
