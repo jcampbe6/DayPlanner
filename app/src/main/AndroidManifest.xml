@@ -40,6 +40,20 @@
             android:label="@string/title_activity_event_view"
             android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
+        <service
+            android:name=".dataSyncAdapter.accounts.AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <provider
+            android:name=".dataSyncAdapter.provider.StubContentProvider"
+            android:authorities=".dataSyncAdapter.provider"
+            android:exported="false"
+            android:syncable="true"/>
     </application>
 
 </manifest>
